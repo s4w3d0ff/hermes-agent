@@ -1,0 +1,264 @@
+model:
+  default: qwen3.6-35b-a3b
+  provider: lmstudio
+  base_url: http://192.168.1.232:1234/v1
+  context_length: 261000
+agent:
+  max_turns: 69
+  max_verify_nudges: 6
+  clarify_timeout: 4200
+  verbose: false
+  reasoning_effort: xhigh
+  personalities:
+    helpful: You are a helpful, friendly AI assistant.
+    concise: You are a concise assistant. Keep responses brief and to the point.
+    technical: You are a technical expert. Provide detailed, accurate technical information.
+    creative: You are a creative assistant. Think outside the box and offer innovative
+      solutions.
+terminal:
+  backend: local
+  timeout: 360
+  home_mode: auto
+  container_cpu: 1
+  container_memory: 5120
+  container_disk: 51200
+  container_persistent: true
+  docker_mount_cwd_to_workspace: false
+  lifetime_seconds: 300
+web:
+  backend: ddgs
+  use_gateway: false
+browser:
+  inactivity_timeout: 120
+  cloud_provider: camofox
+  use_gateway: false
+tool_loop_guardrails:
+  warnings_enabled: true
+  hard_stop_enabled: false
+  warn_after:
+    exact_failure: 2
+    same_tool_failure: 3
+    idempotent_no_progress: 3
+  hard_stop_after:
+    exact_failure: 4
+    same_tool_failure: 5
+    idempotent_no_progress: 5
+compression:
+  enabled: true
+  threshold: 0.8
+  target_ratio: 0.4
+  protect_last_n: 25
+  protect_first_n: 7
+  codex_gpt55_autoraise: true
+  codex_app_server_auto: native
+kanban:
+  auto_decompose: false
+  dispatch_in_gateway: false
+prompt_caching:
+  cache_ttl: 2m
+auxiliary:
+  vision:
+    provider: auto
+    model: ''
+  compression:
+    provider: openrouter
+    model: tencent/hy3:free
+  title_generation:
+    provider: openrouter
+    model: nvidia/nemotron-3-super-120b-a12b:free
+  triage_specifier:
+    provider: lmstudio
+    model: qwen3.6-35b-a3b
+  kanban_decomposer:
+    provider: lmstudio
+    model: qwen3.6-35b-a3b
+  profile_describer:
+    provider: lmstudio
+    model: qwen3.6-35b-a3b
+  curator:
+    provider: copilot
+    model: claude-sonnet-4.6
+display:
+  compact: false
+  busy_input_mode: interrupt
+  bell_on_complete: false
+  show_reasoning: false
+  streaming: true
+  skin: default
+  interim_assistant_messages: true
+  tool_progress: all
+  cleanup_progress: false
+  long_running_notifications: true
+  busy_ack_detail: true
+  background_process_notifications: all
+stt:
+  enabled: true
+  local:
+    model: base
+  openai:
+    model: whisper-1
+context:
+  engine: compressor
+memory:
+  memory_enabled: true
+  user_profile_enabled: true
+  memory_char_limit: 8200
+  user_char_limit: 4375
+  nudge_interval: 10
+  flush_min_turns: 6
+delegation:
+  max_iterations: 50
+moa:
+  presets:
+    default:
+      reference_models:
+        - provider: copilot
+          model: claude-sonnet-4.6
+      aggregator:
+        provider: lmstudio
+        model: qwen3.6-35b-a3b
+      fanout: per_iteration
+    gpt5.4+sonnet [Copilot] to Qwen3.6:
+      enabled: true
+      reference_models:
+        - provider: copilot
+          model: gpt-5.4
+        - provider: copilot
+          model: claude-sonnet-4.6
+      aggregator:
+        provider: lmstudio
+        model: qwen3.6-35b-a3b
+      max_tokens: 4096
+      fanout: per_iteration
+    Free(openrouter) to qwen3.6:
+      enabled: true
+      reference_models:
+        - provider: openrouter
+          model: tencent/hy3:free
+        - provider: openrouter
+          model: poolside/laguna-m.1:free
+        - provider: openrouter
+          model: nvidia/nemotron-3-ultra-550b-a55b:free
+      aggregator:
+        provider: lmstudio
+        model: qwen3.6-35b-a3b
+      max_tokens: 4096
+      fanout: per_iteration
+    Free(openrouter) to Sonnet (Copilot):
+      enabled: true
+      reference_models:
+        - provider: openrouter
+          model: tencent/hy3:free
+        - provider: openrouter
+          model: poolside/laguna-m.1:free
+        - provider: openrouter
+          model: nvidia/nemotron-3-ultra-550b-a55b:free
+      aggregator:
+        provider: copilot
+        model: claude-sonnet-4.6
+      max_tokens: 4096
+      fanout: per_iteration
+  reference_models:
+    - provider: copilot
+      model: claude-sonnet-4.6
+  aggregator:
+    provider: lmstudio
+    model: qwen3.6-35b-a3b
+  max_tokens: 4096
+  fanout: per_iteration
+  enabled: true
+skills:
+  guard_agent_created: true
+  write_approval: true
+  creation_nudge_interval: 15
+  disabled:
+    - inference-sh-cli
+discord:
+  auto_thread: false
+  bots_require_inline_mention: true
+  approval_mentions: true
+  voice_fx:
+    ambient_enabled: false
+approvals:
+  destructive_slash_confirm: false
+code_execution:
+  timeout: 360
+  max_tool_calls: 100
+streaming:
+  enabled: false
+onboarding:
+  seen:
+    tool_progress_prompt: true
+updates:
+  pre_update_backup: false
+  backup_keep: 5
+  non_interactive_local_changes: stash
+_config_version: 33
+session_reset:
+  mode: none
+  idle_minutes: 1440
+  at_hour: 4
+group_sessions_per_user: true
+platform_toolsets:
+  cli:
+    - browser
+    - clarify
+    - code_execution
+    - cronjob
+    - delegation
+    - file
+    - memory
+    - session_search
+    - skills
+    - terminal
+    - todo
+    - web
+  telegram:
+    - hermes-telegram
+  discord:
+    - browser
+    - clarify
+    - code_execution
+    - cronjob
+    - delegation
+    - discord
+    - discord_admin
+    - file
+    - memory
+    - session_search
+    - skills
+    - terminal
+    - todo
+    - web
+  whatsapp:
+    - hermes-whatsapp
+  slack:
+    - hermes-slack
+  signal:
+    - hermes-signal
+  homeassistant:
+    - hermes-homeassistant
+  qqbot:
+    - hermes-qqbot
+  yuanbao:
+    - hermes-yuanbao
+  teams:
+    - hermes-teams
+  google_chat:
+    - hermes-google_chat
+known_plugin_toolsets:
+  cli:
+    - spotify
+  discord:
+    - spotify
+plugins:
+  enabled:
+    - dashboard_auth/basic
+    - web/ddgs
+  disabled: []
+platforms:
+  discord:
+    enabled: false
+fallback_model:
+  provider: openrouter
+  model: nvidia/nemotron-3-ultra-550b-a55b:free

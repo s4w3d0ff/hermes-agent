@@ -48,3 +48,15 @@ local/
 checkpoints/
 sandboxes/
 backups/
+
+__pycache__/
+*.pyc
+.no-bundled-skills
+profiles/*/skills/.usage.json
+profiles/*/lsp/
+profiles/*/.gitignore
+profiles/*/pastes/
+cron/ticker_last_success
+cron/ticker_heartbeat
+profiles/*/cron/ticker_last_success
+profiles/*/cron/ticker_heartbeat
