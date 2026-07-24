@@ -46,6 +46,7 @@ channel_directory.json
 /sessions/
 /logs/
 /state/
+/state-snapshots/
 /plans/
 /workspace/
 /home/
@@ -72,6 +73,7 @@ profiles/*/memories/
 profiles/*/sessions/
 profiles/*/logs/
 profiles/*/state/
+profiles/*/state-snapshots/
 profiles/*/plans/
 profiles/*/workspace/
 profiles/*/home/

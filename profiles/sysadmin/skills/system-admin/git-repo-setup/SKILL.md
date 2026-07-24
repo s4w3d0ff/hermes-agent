@@ -87,6 +87,8 @@ git push origin <branch>                  # match remote's actual branch name
 ## Pitfalls
 
 - **Never assume file state is current.** Always re-read files fresh before acting on their content — even if you just wrote to them or read them earlier in the conversation. You will be wrong about cached/stale state often. This is the first rule.
+- **`.gitignore` does not untrack committed files.** A pattern added to `.gitignore` only affects *untracked* files. Files already in the repo history remain tracked regardless of ignore rules. To stop tracking them: `git rm --cached -f <file>` then commit. Verify with `git status --short` afterward — deleted entries confirm removal from tracking.
+- **Verify .gitignore patterns with test files.** Before committing a new ignore pattern, create a dummy file matching the pattern (e.g., `touch .npm_lock_hash_test`, `touch gateway.heartbeat`), run `git add .`, then check `git status --short`. If the test file does not appear, the pattern works. Clean up afterward (`rm <test files>`). This catches mis-match patterns before they land in a commit.
 - **Don't rewrite gitignore from scratch.** Start from the remote's existing version, then add gaps. Rewriting tends to break things that were working.
 - **Gitignore patterns are relative to repo root.** `*/skills/.usage.json` won't match `profiles/deez/skills/.usage.json`. Use anchored paths: `profiles/*/skills/.usage.json`.
 - **Directory name collisions:** A bare directory pattern like `kanban/` matches ANY directory named `kanban` at any depth — including `profiles/*/skills/kanban-worker/`. Fix: anchor with leading slash `/kanban/` to match only root-level directories. Same applies to `cron/`, `hooks/`, `bin/`, etc.

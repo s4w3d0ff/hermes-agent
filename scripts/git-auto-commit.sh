@@ -9,6 +9,14 @@ LOG_FILE="$HERMES_DIR/scripts/git-auto-commit.log"
 
 cd "$HERMES_DIR" || exit 1
 
+# Remove any tracked files that now match .gitignore patterns so they won't
+# get picked up by `git add .` in future cron runs
+for f in $(git ls-files); do
+    if git check-ignore -q "$f"; then
+        git rm --cached "$f" 2>/dev/null || true
+    fi
+done
+
 # Stage all changes
 git add .
 

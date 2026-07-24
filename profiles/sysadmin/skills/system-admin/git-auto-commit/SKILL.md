@@ -22,7 +22,7 @@ Write a bash script using `skill_manage(action='write_file')` under the skill's 
 
 ### 2. Install as System Crontab
 
-Do NOT use Hermes cron — this is a system crontab (`crontab -l`). Write the entry to a temp file and install via `crontab <file>`. Avoid chaining commands (user deny rules block `&&`, `;`, `||`). Use `workdir=` instead of `cd &&` for git commands.
+Do NOT use Hermes cron — this is a system crontab (`crontab -l`). Write the entry to a temp file and install via `crontab <file>`. **Never chain commands** (`&&`, `||`, `;`) — user deny rules block these. Use `workdir=` instead of `cd &&` for git commands. Run each command as a separate terminal call.
 
 ### 3. Verify Execution
 
@@ -35,6 +35,8 @@ Run the script manually once to confirm it works end-to-end before relying on cr
 
 ## Pitfalls
 
+- **Tracked files that should be ignored**: `.gitignore` does NOT affect files already committed to the repo. The cron script must proactively handle this: before `git add .`, iterate `git ls-files`, check each against `git check-ignore -q`, and run `git rm --cached` on any match. This prevents previously tracked files from being silently re-committed when a new `.gitignore` rule catches them. See `scripts/git-auto-commit.sh` for the canonical template with this logic.
+- **Crontab step values**: `*/24` is rejected by cron (max step value is 23). Use `0 0 * * *` for daily at midnight. For "every N hours" where N <= 23, use `0 */N * * *`. Anything > 23 needs full cron syntax like `0 9 * * *`. See `references/crontab-quirks.md`.
 - **Crontab step values**: `*/24` is rejected by cron (max step value is 23). Use `0 0 * * *` for daily at midnight. For "every N hours" where N <= 23, use `0 */N * * *`. Anything > 23 needs full cron syntax like `0 9 * * *`. See `references/crontab-quirks.md`.
 - **Tag duplicates**: `git tag` without `-f` fails on existing tags. With `set -e`, this aborts the entire script. Always use `git tag -f "$DATE_TAG"`.
 - **Verification sufficiency**: The first successful run's output IS sufficient evidence. Do not undo, reset, and re-run — that creates divergent local history and is wasted work.
@@ -43,3 +45,5 @@ Run the script manually once to confirm it works end-to-end before relying on cr
 ## Session-Specific References
 
 See `references/crontab-quirks.md` for crontab step value limits and syntax quirks.
+See `references/untracked-vs-ignored.md` for the tracked-vs-ignored distinction and how to untrack files that were previously committed.
+Use `scripts/verify-gitignore.sh` to validate ignore rules by creating test files and running `git add .`.
