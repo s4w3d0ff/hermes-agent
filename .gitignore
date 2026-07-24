@@ -24,7 +24,7 @@ channel_directory.json
 .hermes_history
 .hub/
 .worktrees/
-kanban/
+/kanban/
 node/
 gateway/
 pairing/

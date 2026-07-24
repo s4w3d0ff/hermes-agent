@@ -88,9 +88,11 @@ git push origin <branch>                  # match remote's actual branch name
 
 - **Don't rewrite gitignore from scratch.** Start from the remote's existing version, then add gaps. Rewriting tends to break things that were working.
 - **Gitignore patterns are relative to repo root.** `*/skills/.usage.json` won't match `profiles/deez/skills/.usage.json`. Use anchored paths: `profiles/*/skills/.usage.json`.
+- **Directory name collisions:** A bare directory pattern like `kanban/` matches ANY directory named `kanban` at any depth — including `profiles/*/skills/kanban-worker/`. Fix: anchor with leading slash `/kanban/` to match only root-level directories. Same applies to `cron/`, `hooks/`, `bin/`, etc.
 - **Never assume branch name.** Always check `git ls-remote origin` first. If HEAD points to `master`, use `master`. Do NOT create a `main` branch that diverges from the remote's default.
 - **Don't bypass repo defaults.** If the GitHub profile is configured with a specific default branch, match it exactly. Never change repo config to work around defaults.
-- **One command at a time.** No chaining (`&&`, `;`, `||`). Execute single commands sequentially.
+- **Never assume what files exist.** Check each profile's contents individually before assuming they have SOUL.md, config.yaml, profile.yaml. Some profiles may only have skills and no config files.
+- **One command at a time.** No chaining (`&&`, `;`, `||`). Execute single commands sequentially. Terminal tool may block chained commands via user-defined deny rules.
 
 ## Session-Specific References
 
