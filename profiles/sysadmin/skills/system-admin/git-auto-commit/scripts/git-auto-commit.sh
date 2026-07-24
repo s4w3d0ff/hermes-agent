@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Auto-commit and push ~/.hermes to origin/master with date-based tag
+# Installed via system crontab (not Hermes cron)
 
 set -euo pipefail
 
@@ -15,15 +16,18 @@ git add .
 # Check if there are any changes to commit
 if ! git diff --cached --quiet; then
     # Create commit message with date
-    git commit -m "cronjob(remote-backup): $DATE_TAG"
+    git commit -m "auto-commit: $DATE_TAG"
 
-    # Create version tag using the date
+    # Create version tag using the date (force-update handles duplicates)
     git tag -f "$DATE_TAG"
 
-    # Force-push master and tag to overwrite remote (never pull)
-    git push --force origin master && git push --force origin "$DATE_TAG"
+    # Fetch and merge remote changes to avoid non-fast-forward rejections
+    git pull origin master || true
+
+    # Push to master branch and tags
+    git push origin master && git push origin "$DATE_TAG"
 
     echo "$(date '+%Y-%m-%d %H:%M:%S') COMMITTED, tagged $DATE_TAG, pushed to origin/master" >> "$LOG_FILE"
 else
-    echo "$(date '+%Y-%m-%d %H:%M:%S') NO CHANGES - nothing to commit" >> "$LOG_FILE"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') NO CHANGES — nothing to commit" >> "$LOG_FILE"
 fi
