@@ -22,6 +22,8 @@ fallback_providers:
   - provider: openrouter
     model: free
     context_length: 200000
+credential_pool_strategies:
+  openrouter: round_robin
 auxiliary:
   vision:
     provider: openrouter
@@ -40,54 +42,52 @@ auxiliary:
     model: nvidia/nemotron-3-ultra-550b-a55b:free
 toolsets:
   - hermes-cli
-  - kanban
-  - skills
-  - terminal
+  - cronjob
   - clarify
-  - project
-  - memory
-  - discord
+  - kanban
   - context_engine
-  - session_search
-  - web
-  - browser
+  - discord
+  - discord_admin
+platforms:
+  discord:
+    enabled: true
+platform_toolsets:
+  cli:
+    - hermes-cli
+    - cronjob
+    - clarify
+    - kanban
+    - context_engine
+  discord:
+    - hermes-cli
+    - cronjob
+    - clarify
+    - kanban
+    - context_engine
+    - discord
+    - discord_admin
 agent:
   max_turns: 420
   max_verify_nudges: 6
+  verbose: true
+  reasoning_effort: xhigh
   clarify_timeout: 4200
   tool_use_enforcement: true
   disabled_toolsets:
     - delegation
     - computer_use
     - vision
-  verbose: true
-  reasoning_effort: xhigh
-platforms:
-  discord:
-    enabled: false
-platform_toolsets:
-  cli:
-    - hermes-cli
-    - kanban
-    - skills
-    - terminal
-    - clarify
+    - video
     - project
-    - memory
-    - discord
-    - context_engine
-    - session_search
-  discord:
-    - hermes-cli
-    - kanban
-    - skills
-    - terminal
-    - clarify
-    - project
-    - memory
-    - discord
-    - context_engine
-    - session_search
+    - image_gen
+    - video_gen
+    - tts
+    - spotify
+    - homeassistant
+    - yuanbao
+    - feishu_doc
+    - feishu_drive
+    - x_search
 kanban:
   dispatch_in_gateway: true
   orchestrator_profile: shamu
@@ -145,7 +145,7 @@ display:
   bell_on_complete: false
   show_reasoning: true
   streaming: true
-  skin: default
+  skin: sisyphus
   interim_assistant_messages: true
   tool_progress: verbose
   tool_progress_command: true
@@ -165,8 +165,6 @@ skills:
   creation_nudge_interval: 15
 goals:
   max_turns: 420
-credential_pool_strategies:
-  openrouter: round_robin
 web:
   backend: ddgs
   use_gateway: false
@@ -201,6 +199,13 @@ group_sessions_per_user: true
 approvals:
   destructive_slash_confirm: false
   deny:
+    # Never allow chaining bash commands
+    - '*&&*'
+    - '*||*'
+    - '*;*'
+    # Never allow comments or echo
+    - '*#*'
+    - '*echo*'
     # Hermes: commands an agent should never use
     - 'hermes *chat*'
     - 'hermes profile use*'
