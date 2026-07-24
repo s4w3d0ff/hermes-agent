@@ -45,6 +45,7 @@ channel_directory.json
 /memories/
 /sessions/
 /logs/
+/state/
 /plans/
 /workspace/
 /home/
@@ -70,6 +71,7 @@ profiles/*/browser_screenshots/
 profiles/*/memories/
 profiles/*/sessions/
 profiles/*/logs/
+profiles/*/state/
 profiles/*/plans/
 profiles/*/workspace/
 profiles/*/home/
