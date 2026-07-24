@@ -1,7 +1,8 @@
 # Credentials & secrets - NEVER commit
 auth.json
 .env
-.env.EXAMPLE
+.env*
+env
 # Local files we dont want in the repo
 __pycache__/
 *.pyc
@@ -11,6 +12,7 @@ __pycache__/
 *.lock
 *.log
 *.bak*
+*.heartbeat
 active_profile
 gateway_state.json
 processes.json
@@ -18,6 +20,7 @@ provider_models_cache.json
 ollama_cloud_models_cache.json
 models_dev_cache.json
 channel_directory.json
+.npm_lock*
 .clean_shutdown
 .no-bundled-skills
 .skills_prompt_snapshot.json
