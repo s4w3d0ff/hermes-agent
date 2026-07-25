@@ -22,8 +22,6 @@ fallback_providers:
   - provider: openrouter
     model: free
     context_length: 200000
-credential_pool_strategies:
-  openrouter: round_robin
 auxiliary:
   vision:
     provider: openrouter
@@ -42,52 +40,54 @@ auxiliary:
     model: nvidia/nemotron-3-ultra-550b-a55b:free
 toolsets:
   - hermes-cli
-  - cronjob
-  - clarify
   - kanban
-  - context_engine
+  - skills
+  - terminal
+  - clarify
+  - project
+  - memory
   - discord
-  - discord_admin
-platforms:
-  discord:
-    enabled: true
-platform_toolsets:
-  cli:
-    - hermes-cli
-    - cronjob
-    - clarify
-    - kanban
-    - context_engine
-  discord:
-    - hermes-cli
-    - cronjob
-    - clarify
-    - kanban
-    - context_engine
-    - discord
-    - discord_admin
+  - context_engine
+  - session_search
+  - web
+  - browser
 agent:
   max_turns: 420
   max_verify_nudges: 6
-  verbose: true
-  reasoning_effort: high
   clarify_timeout: 4200
   tool_use_enforcement: true
   disabled_toolsets:
     - delegation
     - computer_use
     - vision
-    - video
+  verbose: true
+  reasoning_effort: xhigh
+platforms:
+  discord:
+    enabled: false
+platform_toolsets:
+  cli:
+    - hermes-cli
+    - kanban
+    - skills
+    - terminal
+    - clarify
     - project
-    - image_gen
-    - video_gen
-    - tts
-    - spotify
-    - homeassistant
-    - yuanbao
-    - feishu_doc
-    - feishu_drive
-    - x_search
+    - memory
+    - discord
+    - context_engine
+    - session_search
+  discord:
+    - hermes-cli
+    - kanban
+    - skills
+    - terminal
+    - clarify
+    - project
+    - memory
+    - discord
+    - context_engine
+    - session_search
 kanban:
   dispatch_in_gateway: true
   orchestrator_profile: shamu
@@ -117,11 +117,11 @@ tool_loop_guardrails:
   warn_after:
     exact_failure: 2
     same_tool_failure: 3
-    idempotent_no_progress: 2
+    idempotent_no_progress: 3
   hard_stop_after:
-    exact_failure: 3
-    same_tool_failure: 4
-    idempotent_no_progress: 4
+    exact_failure: 4
+    same_tool_failure: 5
+    idempotent_no_progress: 5
 context:
   engine: compressor
 context_file_max_chars: 50000
@@ -135,9 +135,9 @@ memory:
   flush_min_turns: 6
 compression:
   enabled: true
-  threshold: 0.9
-  target_ratio: 0.6
-  protect_last_n: 25
+  threshold: 0.85
+  target_ratio: 0.65
+  protect_last_n: 20
   protect_first_n: 10
 display:
   compact: false
@@ -145,7 +145,7 @@ display:
   bell_on_complete: false
   show_reasoning: true
   streaming: true
-  skin: sisyphus
+  skin: default
   interim_assistant_messages: true
   tool_progress: verbose
   tool_progress_command: true
@@ -160,11 +160,15 @@ display:
   background_process_notifications: all
   language: en
 skills:
+  external_dirs:
+    - ~/.hermes/skills
   guard_agent_created: true
   write_approval: false
   creation_nudge_interval: 15
 goals:
   max_turns: 420
+credential_pool_strategies:
+  openrouter: round_robin
 web:
   backend: ddgs
   use_gateway: false
@@ -199,12 +203,6 @@ group_sessions_per_user: true
 approvals:
   destructive_slash_confirm: false
   deny:
-    # Never allow chaining bash commands
-    - '*&&*'
-    - '*||*'
-    - '*;*'
-    # Never allow inline comments
-    - '*#*'
     # Hermes: commands an agent should never use
     - 'hermes *chat*'
     - 'hermes profile use*'
