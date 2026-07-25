@@ -225,7 +225,7 @@ approvals:
     - 'hermes *send*'
     - 'hermes *gateway*'
     - 'hermes *setup*'
-    # Git: never destroy or rewrite remote history
+    # Git: never destroy or rewrite remote history (the agent always fucks this up)
     - 'git push --force*'
     - 'git push -*f*'
     - 'git push * --force*'
