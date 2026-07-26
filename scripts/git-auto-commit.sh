@@ -8,12 +8,14 @@ HERMES_DIR="$HOME/.hermes"
 DATE_TAG="$(date +%Y-%m-%d)"
 LOG_FILE="$HERMES_DIR/scripts/git-auto-commit.log"
 
+export HERMES_DIR LOG_FILE
 cd "$HERMES_DIR" || exit 1
 
 # Use Python to find tracked files that match .gitignore patterns
 # and untrack them via git rm --cached
 python3 << 'PYTHON_EOF'
 import fnmatch
+import os
 import subprocess
 import sys
 
@@ -73,7 +75,7 @@ def should_ignore(filepath, rules):
                 matched_negation = False
     return matched_negation
 
-hermes_dir = "/home/s4w3d0ff/.hermes"
+hermes_dir = os.environ["HERMES_DIR"]
 gitignore_path = hermes_dir + "/.gitignore"
 rules = parse_gitignore(gitignore_path)
 
