@@ -15,6 +15,7 @@ __pycache__/
 *.heartbeat
 active_profile
 gateway_state.json
+web-ui-build-stamp.json
 processes.json
 provider_models_cache.json
 ollama_cloud_models_cache.json
