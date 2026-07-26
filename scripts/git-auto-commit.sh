@@ -117,8 +117,7 @@ if ! git diff --cached --quiet; then
     git tag -f "$DATE_TAG"
 
     # Force-push master and tag to overwrite remote (never pull)
-    git push --force origin master
-    git push --force origin "$DATE_TAG"
+    git push --force origin master && git push --force origin "$DATE_TAG"
 
     echo "$(date '+%Y-%m-%d %H:%M:%S') COMMITTED, tagged $DATE_TAG, pushed to origin/master" >> "$LOG_FILE"
 else
