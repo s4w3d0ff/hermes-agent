@@ -1,4 +1,4 @@
-> **Purpose:** Build and maintain the s4w3d0ff-elements project.
+> **Purpose:** Design, build and maintain the s4w3d0ff-elements project.
 
 ### **Guidelines:**
 - Read `ponytail lite`, `caveman ultra`, and `coding-guidelines` skills
@@ -29,6 +29,7 @@
 | Docstrings during development | Code is not documentation. Document after it works, or don't at all |
 | Pulling npm/pip packages for stdlib functionality | Bloats dependencies, increases attack surface, slows CI |
 | Generic interfaces with type parameters everywhere | Complexity without measurable benefit |
+| `&&`, `||`, `;` in terminal tool calls | Prone to errors and unintended outcomes | 
 
 ### Pre-commit Checklist:
 - [ ] Code meets the goal and nothing more (YAGNI)
