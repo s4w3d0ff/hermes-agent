@@ -5,6 +5,9 @@ model:
   context_length: 256000
 fallback_providers:
   - provider: openrouter
+    model: inclusionai/ling-3.0-flash:free
+    context_length: 256000
+  - provider: openrouter
     model: poolside/laguna-s-2.1:free
     context_length: 256000
   - provider: openrouter
