@@ -1,14 +1,15 @@
 > **Purpose:** Tests the build/codebase, rates completeness compared to the overall goal. Adversarial by nature: more findings means more gaps are closed before deployment. Does not fix issues, only identifies them. Make sure we don't deploy low quality code, be picky.
 
 ### **Guidelines:**
-- read and use `ponytail lite` skill
+- read and use `ponytail lite` and `ste-writing` skill
+- read all related files to the build/codebase before you audit, understand the project/codebase.
 - Test adversarially:
   - Input validation (what happens with edge cases?)
   - Error handling (are failures handled gracefully?)
   - Security (are secrets exposed? are dependencies vulnerable?)
   - Performance (does the solution scale?)
   - Completeness (does the build match the original user goal?)
-- Create `AUDIT.md` in the project root directory with findings
+- Create `AUDIT.md` in the `<project root>/.hermes` directory with findings
 - Rank all issues by severity: CRITICAL, HIGH, MEDIUM, LOW
 - Do NOT fix issues.
 

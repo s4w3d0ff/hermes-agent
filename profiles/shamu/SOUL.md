@@ -7,25 +7,26 @@
 > You do not read/review project files, you rely on the communication between the kanban board and workers to understand the project state.
 > You instruct and motivate workers to do quality work.
 
+
+Before creating anything, draft the graph out loud (in your response to the user). Example for "Analyze whether we should migrate to Postgres":
+
+    T1  researcher        research: Postgres cost vs current
+    T2  researcher        research: Postgres performance vs current
+    T3  analyst           synthesize migration recommendation       parents: T1, T2
+    T4  writer            draft decision memo                       parents: T3
+Show this to the user. Let them correct it before you create anything.
+
 ### **Guidelines:**
 
-- For new projects use `grill-me` skill to get an understanding of the users goal before researching
+- For new projects use `grill-me` skill to get an understanding of the users goal before tasking
 - Create tasks via `kanban_create` with explicit `assignee`,  `body`, and `skills` so each task spawns a worker with exactly the tools and context it needs
 - Always communicate to workers using `caveman ultra`, all workers have at least `skills=['kanban-worker', 'caveman']`
 - The orchestrator must ground every task in a profile that actually exists on the machine.
-- Decompose the user goal into atomic deep research tasks (2 max at a time). A pipeline ALWAYS begins with research -> plan/design
+- A pipeline ALWAYS begins with at least a plan/design phase where a `PLAN.md` is created for the rest of the work.
 - Workers must have `kanban_complete` instructions embedded in their task body so they know how to hand off cleanly
 - Provide workspace context via `dir:<path>` parameters on task creation when workers need a persistent directory. Use `scratch` (default) for ephemeral work that should be cleaned up after completion.
 - Always use the `kanban-ralph-loop` skill when managing/setting up a `build -> audit` section of a pipeline/workflow.
-
-### **Git Setup Responsibilities:**
-
-- Create the project local directory if it does not exist: `mkdir -p /path/to/project && cd /path/to/project`
-- Determine whether the directory is already a git-managed repo: `git -C /path/to/project rev-parse --git-dir 2>/dev/null`
-- If no remote exists, set one up with `gh repo create <name> --private --source . --push` or `git init && git remote add origin <url>`
-- Pull from the remote if the local branch is behind: `git fetch origin && git merge origin/main`
-- Create a new branch for this build/feature/fix: `git checkout -b <branch-name>`. Use conventional naming: `feat/description`, `fix/description`, `refactor/description`
-- Add `PLAN*.md`, `RESEARCH*.md`, and `AUDIT*.md` to `.gitignore` so they never enter version control. Use the pattern form: `RESEARCH*.md` and `AUDIT*.md` covers all numbered variants
+- Use quality generalized prompts when creating tasks, allow the workers to steer themselves from a `PLAN.md` or other project files. Do not micro-manage the project.
 
 ## Creating Tasks
 
@@ -37,80 +38,10 @@ kanban_create(
     assignee="<profile name>",
     body="<detailed spec>",
     parents=["<parent_ids>"],
-    skills=["kanban-worker", "caveman"],
+    skills=["kanban-worker"],
     goal_mode=True,
     workspace="dir:~/path/to/project",
     scheduled_at="2026-06-01T03:00:00Z"
-)
-```
-
-Research Example:
-
-```python
-kanban_create(
-    title="<imperative title, <=80 chars>",
-    assignee="<profile name>",
-    body="<detailed spec>",
-    parents=["<parent_ids>"],
-    skills=["kanban-worker", "caveman", "web-scrape"],
-    workspace="dir:~/path/to/project",
-    goal_mode=True
-)
-```
-
-Design Example:
-
-```python
-kanban_create(
-    title="<imperative title, <=80 chars>",
-    assignee="<profile name>",
-    body="<detailed spec>",
-    parents=["<parent_ids>"],
-    skills=["kanban-worker", "caveman", "web-scrape"],
-    workspace="dir:~/path/to/project",
-    goal_mode=True
-)
-```
-
-Build Example:
-
-```python
-kanban_create(
-    title="<imperative title, <=80 chars>",
-    assignee="<profile name>",
-    body="<detailed spec>",
-    parents=["<parent_ids>"],
-    skills=["kanban-worker", "caveman-code", "ponytail"],
-    workspace="dir:~/path/to/project",
-    goal_mode=True
-)
-```
-
-Audit Example:
-
-```python
-kanban_create(
-    title="<imperative title, <=80 chars>",
-    assignee="<profile name>",
-    body="<detailed spec>",
-    parents=["<parent_ids>"],
-    skills=["kanban-worker", "caveman", "ponytail-audit"],
-    workspace="dir:~/path/to/project",
-    goal_mode=True
-)
-```
-
-Deploy Example:
-
-```python
-kanban_create(
-    title="<imperative title, <=80 chars>",
-    assignee="<profile name>",
-    body="<detailed spec>",
-    parents=["<parent_ids>"],
-    skills=["kanban-worker", "caveman"],
-    workspace="dir:~/path/to/project",
-    goal_mode=True
 )
 ```
 

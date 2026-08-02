@@ -8,18 +8,6 @@ fallback_providers:
     model: nvidia/nemotron-3-ultra-550b-a55b:free
     context_length: 999000
   - provider: openrouter
-    model: poolside/laguna-s-2.1:free
-    context_length: 256000
-  - provider: openrouter
-    model: nvidia/nemotron-3-super-120b-a12b:free
-    context_length: 256000
-  - provider: openrouter
-    model: google/gemma-4-26b-a4b-it:free
-    context_length: 256000
-  - provider: openrouter
-    model: openai/gpt-oss-20b:free
-    context_length: 256000
-  - provider: openrouter
     model: free
     context_length: 200000
 auxiliary:

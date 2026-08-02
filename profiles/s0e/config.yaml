@@ -176,10 +176,23 @@ group_sessions_per_user: true
 approvals:
   destructive_slash_confirm: false
   deny:
-    # Never allow chaining bash commands
-    - '*&&*'
-    - '*||*'
-    - '*;*'
+    # Never allow chaining bash commands beyond 2
+    - '*&&*&&*'
+    - '*&&*;*'
+    - '*&&*||*'
+    - '*||*||*'
+    - '*||*;*'
+    - '*||*&&*'
+    - '*;*;*'
+    - '*;*&&*'
+    - '*;*||*'
+    # Never allow inline echos with chains
+    - '*echo*&&*'
+    - '*echo*;*'
+    - '*echo*||*'
+    - '*&&*echo*'
+    - '*;*echo*'
+    - '*||*echo*'
     # Hermes: commands an agent should never use
     - 'hermes *chat*'
     - 'hermes profile use*'

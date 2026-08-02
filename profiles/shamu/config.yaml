@@ -1,27 +1,18 @@
 model:
-  provider: lmstudio
-  default: qwen3.6-35b-a3b
-  base_url: http://192.168.1.232:1234/v1
-  context_length: 256000
+  provider: openrouter
+  model: nvidia/nemotron-3-ultra-550b-a55b:free
+  context_length: 999000
 fallback_providers:
-  - provider: openrouter
-    model: nvidia/nemotron-3-ultra-550b-a55b:free
-    context_length: 999000
-  - provider: openrouter
-    model: poolside/laguna-s-2.1:free
-    context_length: 256000
-  - provider: openrouter
-    model: nvidia/nemotron-3-super-120b-a12b:free
-    context_length: 256000
-  - provider: openrouter
-    model: google/gemma-4-26b-a4b-it:free
-    context_length: 256000
   - provider: openrouter
     model: openai/gpt-oss-20b:free
     context_length: 256000
   - provider: openrouter
     model: free
     context_length: 200000
+  - provider: lmstudio
+    default: qwen3.6-35b-a3b
+    base_url: http://192.168.1.232:1234/v1
+    context_length: 256000
 credential_pool_strategies:
   openrouter: round_robin
 auxiliary:
@@ -204,13 +195,23 @@ group_sessions_per_user: true
 approvals:
   destructive_slash_confirm: false
   deny:
-    # Never allow chaining bash commands
-    - '*&&*'
-    - '*||*'
-    - '*;*'
-    # Never allow comments or echo
-    - '*#*'
-    - '*echo*'
+    # Never allow chaining bash commands beyond 2
+    - '*&&*&&*'
+    - '*&&*;*'
+    - '*&&*||*'
+    - '*||*||*'
+    - '*||*;*'
+    - '*||*&&*'
+    - '*;*;*'
+    - '*;*&&*'
+    - '*;*||*'
+    # Never allow inline echos with chains
+    - '*echo*&&*'
+    - '*echo*;*'
+    - '*echo*||*'
+    - '*&&*echo*'
+    - '*;*echo*'
+    - '*||*echo*'
     # Hermes: commands an agent should never use
     - 'hermes *chat*'
     - 'hermes profile use*'

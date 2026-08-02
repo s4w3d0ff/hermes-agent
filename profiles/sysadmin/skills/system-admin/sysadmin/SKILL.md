@@ -1,5 +1,5 @@
 ---
-name: system-admin
+name: sysadmin
 description: >-
   Instructions and guidelines on how to be a system admin for a ubuntu based server
 platforms: [linux, macos, windows]
