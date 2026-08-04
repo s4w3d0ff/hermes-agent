@@ -5,9 +5,6 @@ model:
   context_length: 256000
 fallback_providers:
   - provider: openrouter
-    model: openai/gpt-oss-20b:free
-    context_length: 256000
-  - provider: openrouter
     model: free
     context_length: 200000
 credential_pool_strategies:

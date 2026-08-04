@@ -1,18 +1,12 @@
 model:
-  provider: openrouter
-  model: nvidia/nemotron-3-ultra-550b-a55b:free
-  context_length: 999000
+  provider: lmstudio
+  default: qwen3.6-35b-a3b
+  base_url: http://192.168.1.232:1234/v1
+  context_length: 256000
 fallback_providers:
-  - provider: openrouter
-    model: openai/gpt-oss-20b:free
-    context_length: 256000
   - provider: openrouter
     model: free
     context_length: 200000
-  - provider: lmstudio
-    default: qwen3.6-35b-a3b
-    base_url: http://192.168.1.232:1234/v1
-    context_length: 256000
 credential_pool_strategies:
   openrouter: round_robin
 auxiliary:
@@ -89,7 +83,7 @@ kanban:
   orchestrator_profile: shamu
   default_assignee: researcher
   auto_decompose: false
-  max_in_progress: 2
+  max_in_progress: 1
 discord:
   unauthorized_dm_behavior: ignore
   allowed_channels: '1518715078608683088'

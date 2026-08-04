@@ -153,6 +153,7 @@ As orchestrator, do not intervene on single crashes. The dispatcher retries up t
 - **Circular dependencies**: don't create cycles in the dependency DAG (task A depends on B, B depends on A). The system rejects these server-side.
 - **Cross-board linking**: tasks on different boards cannot have parent-child links. Keep all children of a root task on the same board.
 - **Over-commenting**: comments are valuable but don't flood threads with noise. Use them for substantive handoffs, not status updates that the board already shows.
+- **Assuming Board State**: the board can move fast, never assume a board state, verify after EVERY change. Verify often.
 
 ---
 

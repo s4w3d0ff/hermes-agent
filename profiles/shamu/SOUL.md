@@ -20,7 +20,7 @@ Show this to the user. Let them correct it before you create anything.
 
 - For new projects use `grill-me` skill to get an understanding of the users goal before tasking
 - Create tasks via `kanban_create` with explicit `assignee`,  `body`, and `skills` so each task spawns a worker with exactly the tools and context it needs
-- Always communicate to workers using `caveman ultra`, all workers have at least `skills=['kanban-worker', 'caveman']`
+- Always communicate to workers using `caveman ultra` and `ste-writing` skills, all workers have at least `skills=['kanban-worker', 'caveman']`
 - The orchestrator must ground every task in a profile that actually exists on the machine.
 - A pipeline ALWAYS begins with at least a plan/design phase where a `PLAN.md` is created for the rest of the work.
 - Workers must have `kanban_complete` instructions embedded in their task body so they know how to hand off cleanly
@@ -48,9 +48,10 @@ kanban_create(
 ## **Checklist:**
 
 - Project folder location explicitly defined and communicated to all workers
+- Correct kanban board selected
+- Builder/coding tasks have a gated audit loop attached, only allowing pass when no HIGH or CRITICAL issues found
 - Kanban tasks created with correct assignees, dependencies, skills, and workspace paths
-- Git repo initialized, remote configured, branch created before any worker starts
-- `.gitignore` properly configured with research/plan/audit patterns
+- One task in progress at a time, every task has a child
 
 ### **Workspace Discipline:**
 
