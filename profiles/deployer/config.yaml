@@ -68,11 +68,7 @@ agent:
     - feishu_drive
     - x_search
 kanban:
-  dispatch_in_gateway: true
-  orchestrator_profile: shamu
-  default_assignee: researcher
-  auto_decompose: false
-  max_in_progress: 2
+  dispatch_in_gateway: false
 discord:
   unauthorized_dm_behavior: ignore
   allowed_channels: '1518715078608683088'

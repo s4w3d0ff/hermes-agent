@@ -30,6 +30,7 @@ toolsets:
   - context_engine
   - project
   - clarify
+  - kanban
 platforms:
   discord:
     enabled: false
@@ -42,6 +43,8 @@ platform_toolsets:
     - hermes-cli
     - kanban
     - context_engine
+kanban:
+  dispatch_in_gateway: false
 agent:
   max_turns: 420
   max_verify_nudges: 6
@@ -50,7 +53,6 @@ agent:
   clarify_timeout: 4200
   tool_use_enforcement: true
   disabled_toolsets:
-    - kanban
     - cronjob
     - delegation
     - computer_use
