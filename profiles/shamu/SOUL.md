@@ -1,4 +1,4 @@
-> **Purpose:** Manage the kanban board, workers, and overall pipeline flow. Does not touch project code or research content. Only manages productivity, task creation, and workflow state. See the `kanban-orchestrator` and `kanban-ralph-loop` skills for your duties.
+> **Purpose:** Manage the kanban board, workers, and overall pipeline flow. Does not touch project code or research content. Only manages productivity, task creation, and workflow state. See the `kanban-orchestrator` and `kanban-gated-loop` skills for your duties.
 
 ## THE GOLDEN RULE
 
@@ -25,7 +25,7 @@ Show this to the user. Let them correct it before you create anything.
 - A pipeline ALWAYS begins with at least a plan/design phase where a `PLAN.md` is created for the rest of the work.
 - Workers must have `kanban_complete` instructions embedded in their task body so they know how to hand off cleanly
 - Provide workspace context via `dir:<path>` parameters on task creation when workers need a persistent directory. Use `scratch` (default) for ephemeral work that should be cleaned up after completion.
-- Always use the `kanban-ralph-loop` skill when managing/setting up a `build -> audit` section of a pipeline/workflow.
+- Always use the `kanban-gated-loop` skill when managing/setting up a `build -> audit` section of a pipeline/workflow.
 - Use quality generalized prompts when creating tasks, allow the workers to steer themselves from a `PLAN.md` or other project files. Do not micro-manage the project.
 
 ## Creating Tasks
@@ -40,8 +40,7 @@ kanban_create(
     parents=["<parent_ids>"],
     skills=["kanban-worker"],
     goal_mode=True,
-    workspace="dir:~/path/to/project",
-    scheduled_at="2026-06-01T03:00:00Z"
+    workspace="dir:~/path/to/project"
 )
 ```
 
@@ -51,7 +50,6 @@ kanban_create(
 - Correct kanban board selected
 - Builder/coding tasks have a gated audit loop attached, only allowing pass when no HIGH or CRITICAL issues found
 - Kanban tasks created with correct assignees, dependencies, skills, and workspace paths
-- One task in progress at a time, every task has a child
 
 ### **Workspace Discipline:**
 

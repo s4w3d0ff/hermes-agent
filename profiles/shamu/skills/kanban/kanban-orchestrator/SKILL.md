@@ -7,7 +7,7 @@ platforms: [linux]
 metadata:
   hermes:
     tags: [Kanban, Orchestrator, Board Management, Worker Lifecycle, Decomposition]
-    related_skills: [orchestrator-boundaries, kanban-ralph-loop]
+    related_skills: [orchestrator-boundaries, kanban-gated-loop]
 ---
 ## Core Philosophy
 
@@ -29,7 +29,7 @@ kanban_create(
     parents=["<parent_ids>"],                                         # dependency edges, tasks this task depends on before it can start
     skills=["kanban-worker"],                                         # forces worker to read "kanban-worker" skill when spawned
     goal_mode=True,                                                   # forces worker to work in a goal loop
-    scheduled_at="2026-06-01T03:00:00Z"                               # delays dispatcher from claiming task until set time, useful for root task
+    initial_status="blocked"                                          # keeps dispatcher from claiming root task, use only on the first task of a chain when building the chain
 )
 ```
 
@@ -92,17 +92,14 @@ When woken by the dispatcher, run these checks during long-running orchestration
 
 Not in comments, docstrings, code, markdown, chat responses, or file contents. Zero exceptions. Use `. ` or `, ` or split into two sentences instead. Replace any occurrence with one of those alternatives. em-dashes do not render properly in many text editors and terminals, making source-code/documentation hard to read. Workers should be informed of this as well so they don't pollute project files.
 
-### Root task completion timing
+### Root task
 
-Calling `kanban_complete()` on the root orchestrator task will start the entire pipeline attached. Make sure your pipeline is correct before calling the decomposition task as complete. The dispatcher will "wake" the orchestrator immediately after the orchestrator marks its task as complete, this is fine and should not be expected. The orchestrator should check the board status then go back to stand mode and wait for the dispatcher to wake again when the actual workers are done.
+When creating any root task (a task that wilL be a dependency to ALL later child tasks, example: there are no tasks on the board to depend on) create the root task using the `kanban_create(initial_status="blocked")` param. This will allow you to create the entire pipeline behind the blocked task without the dispatcher claiming tasks when you are in the process of creating child tasks. Once the pipeline is created and you verify the structure and flow is good, `kanban_unblock()` the root task to start the pipeline.
 
-The first task added to the board on a fresh run should be either the decomposition task (task assigned to the orchestrator itself) or a task with the `scheduled_at=` param set. It will be the parent of the first worker task (example: Orchestrator Task -[parent of]-> Research Task -[parent of]-> Plan Task). When the orchestrator is finished creating the task dependency pipeline on the board, it calls `kanban_complete()` on its own task (or stops and allows the scheduled pickup) so that the dispatcher can take over and start the pipeline.
-
-> If you do not create the first orchestration task and attempt to go straight to a worker task without a `scheduled_at=` param set, the pipeline will auto-spawn the worker because there is nothing to block it, this will cause the tasks to start moving before you have a chance to setup the full chain and then you are competing with the workers for the LLM model provider on api requests. Create your own orchestration task first (blocking all other child workers).
 
 ### Build the FULL pipeline upfront (as much as possible), do not micro-manage
 
-When decomposing a multi-phase project (e.g., research → plan → build → audit repeated across phases), create ALL tasks at once with their full dependency graph. Do NOT dispatch phase 1, wait for completion, then create phase 2. Create every task, link all dependencies via `kanban_create()` parents arrays and/or `kanban_link()`, then `kanban_complete` your decomposition task. The dispatcher auto-promotes based on parent-child edges. This is more efficient and how a kanban board is meant to be used.
+When decomposing a multi-phase project (e.g., research → plan → build → audit repeated across phases), create ALL tasks at once with their full dependency graph. Do NOT dispatch phase 1, wait for completion, then create phase 2. Create every task, link all dependencies via `kanban_create()` parents arrays and/or `kanban_link()`, then `kanban_complete` your decomposition task. The dispatcher auto-promotes based on parent-child edges. This is more efficient and how a kanban board is meant to be used. Use generalized bodies and direct workers to read the project development files (AGENTS.md, MILESTONES.md, PLAN.md, AUDIT.md, etc) for their context. You SHOULD NOT be regurgitating the info from these files into the body, let the workers read them for themselves, do not flood the context window with duplicate or irrelevant info.
 
 ### Stand down between phases (do not poll workers)
 
