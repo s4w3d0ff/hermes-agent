@@ -36,14 +36,11 @@ metadata:
 
 1. **`scheduled_at="<ISO8601>"`** - task lands in scheduled state immediately, not dispatched until that time (confirmed working via kanban_create)
 2. **`initial_status="blocked"`** - task lands in blocked state immediately, not dispatched until unblocked manually
+
+**WARNING: `initial_status="blocked"` only works when there are actual parent dependencies blocking promotion. A root task with empty parents (`parents=[]`) and `initial_status="blocked"` gets auto-claimed by the dispatcher immediately because no blocking conditions exist. The blocked flag does NOT work as a standalone timing mechanism.**
 3. **Parent gating** - create a root orchestrator task first and set all worker tasks to depend on it via `parents=[root_task_id]`. Only complete the root task when you want the pipeline to start
 
 > **NOTE:** My kanban_create tool schema may NOT include parameters that are described in documentation (e.g., `initial_status`). Always check the actual available tools at runtime, not just what docs say.
-
-### Delaying Dispatch Workarounds:
-
-1. **`initial_status="blocked"`** - task lands in blocked state immediately, not dispatched until unblocked manually
-2. **Parent gating** - create a root orchestrator task first and set all worker tasks to depend on it via `parents=[root_task_id]`. Only complete the root task when you want the pipeline to start
 
 ### Worker tools that are NOT available:
 
