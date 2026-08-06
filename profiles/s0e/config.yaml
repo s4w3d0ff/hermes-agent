@@ -45,14 +45,13 @@ platform_toolsets:
 kanban:
   dispatch_in_gateway: false
 agent:
-  max_turns: 420
+  max_turns: 4200
   max_verify_nudges: 6
   verbose: true
-  reasoning_effort: xhigh
+  reasoning_effort: high
   clarify_timeout: 4200
   tool_use_enforcement: true
   disabled_toolsets:
-    - kanban
     - cronjob
     - delegation
     - computer_use

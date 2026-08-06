@@ -41,7 +41,6 @@ kanban_create(
 - **Parents**: EVERY task created needs a parent (except the very first task in the chain). Define the parent in `kanban_create`, DO NOT CREATE ORPHAN TASKS (tasks without parents). `kanban_link` should only be used to REPAIR an already established pipeline, splicing new tasks into an already created pipeline.
 - **Skills**: Every task created NEEDS `skills=["kanban-worker"]` so they have the correct instructions on how to conduct work as a kanban-worker.
 - **Goal Mode**: Should be on for most workers, this will encourage the workers to set a goal rather than do something lazy.
-- **Scheduled At**: Should ALWAYS be used on the first initial task when building a pipeline, set to ~5mins into the future to give ample time to build the rest of the pipeline before the initial task gets claimed by the dispatcher.
 
 ### Task Scoping Principles
 
@@ -71,7 +70,7 @@ Workers call `kanban_block(reason=...)` when stuck. Reasons include:
 - `transient`: temporary issue (network error, rate limit)
 - `dependency`: blocked on another task not yet complete
 
-As orchestrator, you can unblock tasks via `kanban_unblock(task_id=...)` once the blocking condition is resolved. If a task fails repeatedly (`kanban.failure_limit`, default 2), the circuit breaker auto-blocks it. You must intervene to fix the root cause before unblocking.
+As orchestrator, you can unblock tasks via `kanban_unblock(task_id=...)` once the blocking condition is resolved. If a task fails repeatedly (`kanban.failure_limit`, default 2), the circuit breaker auto-blocks it. You must intervene to fix the root cause before unblocking. If a task is blocked without a reason DO NOT UNBLOCK THE TASK WITHOUT EXPLICITLY ASKING THE USER. When the user blocks a task, there will be no reason attached.
 
 ### Structured Completion Evidence
 
@@ -94,7 +93,7 @@ Not in comments, docstrings, code, markdown, chat responses, or file contents. Z
 
 ### Root task
 
-When creating any root task (a task that wilL be a dependency to ALL later child tasks, example: there are no tasks on the board to depend on) create the root task using the `kanban_create(initial_status="blocked")` param. This will allow you to create the entire pipeline behind the blocked task without the dispatcher claiming tasks when you are in the process of creating child tasks. Once the pipeline is created and you verify the structure and flow is good, `kanban_unblock()` the root task to start the pipeline.
+When creating any root task (a task that wilL be a dependency to ALL later child tasks, example: there are no tasks on the board to depend on) create the root task using the `kanban_create(initial_status="blocked")` param. This will allow you to create the entire pipeline behind the blocked task without the dispatcher claiming tasks when you are in the process of creating child tasks. Once the pipeline is created and you verify the structure and flow is good, `kanban_unblock()` the root task to start the root task and the rest of the pipeline.
 
 
 ### Build the FULL pipeline upfront (as much as possible), do not micro-manage
