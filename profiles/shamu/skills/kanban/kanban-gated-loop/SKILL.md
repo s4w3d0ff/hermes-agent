@@ -259,4 +259,6 @@ kanban_link(parent_id="audit2_task_id", child_id="deploy_task_id")
 
 #### REMEMBER: Always create a task with parents, if you don't define the parents on a live (unblocked) board the dispatcher will claim the task without a parent and run it in parallel (which is BAD). We want every task to have a parent, no orphans.
 
-The audits should use `kanban_block()` when finding HIGH or greater gaps/issues while auditing. This allows the orchestrator to properly create extra Gated Loops with relevant context from previous loops while maintaining task dependencies.
+The audits should use `kanban_block()` when finding HIGH or greater gaps/issues while auditing. This allows the orchestrator time to properly create extra Gated Loops with relevant context from previous loops while maintaining task dependencies.
+
+When a loop blocks and you need to add another loop, create the loop as a child of the blocked task, when everything is created and linked use `kanban_complete` on the blocked task so that the children tasks can move forward. If you call kanban_unblock it will trigger the blocked task to run first a second time (we do not want this).
