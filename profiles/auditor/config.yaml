@@ -1,6 +1,6 @@
 model:
   provider: lmstudio
-  default: qwen3.6-35b-a3b-mtp
+  default: ornith-1.0-35b-mtp-apex
   base_url: http://192.168.1.232:1234/v1
   context_length: 200000
 fallback_providers:
@@ -15,16 +15,16 @@ auxiliary:
     model: google/gemma-4-26b-a4b-it:free
   compression:
     provider: openrouter
-    model: nvidia/nemotron-3-ultra-550b-a55b:free
+    model: openrouter/free
   title_generation:
     provider: openrouter
-    model: google/gemma-4-26b-a4b-it:free
+    model: openrouter/free
   profile_describer:
     provider: openrouter
-    model: google/gemma-4-26b-a4b-it:free
+    model: openrouter/free
   curator:
     provider: openrouter
-    model: nvidia/nemotron-3-ultra-550b-a55b:free
+    model: openrouter/free
 toolsets:
   - hermes-cli
   - kanban
@@ -43,7 +43,7 @@ platform_toolsets:
     - kanban
     - context_engine
 agent:
-  max_turns: 420
+  max_turns: 4200
   max_verify_nudges: 6
   verbose: true
   reasoning_effort: high
