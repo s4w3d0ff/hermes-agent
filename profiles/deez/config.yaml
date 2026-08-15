@@ -1,12 +1,10 @@
 model:
   provider: lmstudio
-  default: qwen3.6-35b-a3b-mtp
+  default: qwen3.8-27b
   base_url: http://192.168.1.232:1234/v1
-  context_length: 200000
 fallback_providers:
   - provider: openrouter
     model: openrouter/free
-    context_length: 200000
 credential_pool_strategies:
   openrouter: round_robin
 auxiliary:
@@ -15,16 +13,16 @@ auxiliary:
     model: google/gemma-4-26b-a4b-it:free
   compression:
     provider: openrouter
-    model: nvidia/nemotron-3-ultra-550b-a55b:free
+    model: openrouter/free
   title_generation:
     provider: openrouter
-    model: google/gemma-4-26b-a4b-it:free
+    model: openrouter/free
   profile_describer:
     provider: openrouter
-    model: google/gemma-4-26b-a4b-it:free
+    model: openrouter/free
   curator:
     provider: openrouter
-    model: nvidia/nemotron-3-ultra-550b-a55b:free
+    model: openrouter/free
 toolsets:
   - hermes-cli
   - cronjob
@@ -53,7 +51,7 @@ platform_toolsets:
     - discord
     - discord_admin
 agent:
-  max_turns: 420
+  max_turns: 4200
   max_verify_nudges: 6
   verbose: true
   reasoning_effort: high

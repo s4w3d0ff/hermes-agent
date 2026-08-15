@@ -1,12 +1,10 @@
 model:
   provider: lmstudio
-  default: ornith-1.0-35b-mtp-apex
+  default: qwen3.8-27b
   base_url: http://192.168.1.232:1234/v1
-  context_length: 200000
 fallback_providers:
   - provider: openrouter
     model: openrouter/free
-    context_length: 200000
 credential_pool_strategies:
   openrouter: round_robin
 auxiliary:
