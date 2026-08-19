@@ -1,6 +1,6 @@
 model:
   provider: lmstudio
-  default: qwen3.8-27b
+  default: qwen3.8-27b-uncensored
   base_url: http://192.168.1.232:1234/v1
 fallback_providers:
   - provider: openrouter
@@ -55,7 +55,7 @@ agent:
   max_turns: 4200
   max_verify_nudges: 6
   verbose: true
-  reasoning_effort: high
+  reasoning_effort: low
   clarify_timeout: 4200
   tool_use_enforcement: true
   disabled_toolsets:
@@ -151,6 +151,8 @@ skills:
   guard_agent_created: true
   write_approval: false
   creation_nudge_interval: 15
+  external_dirs:
+    - ~/.hermes/skills
 goals:
   max_turns: 420
 web:
