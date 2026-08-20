@@ -68,7 +68,7 @@ A high-level project overview document that:
   - High-level purpose in 2-3 sentences
   - Expected data flow or workflow
   - Key functions, methods, or modules to be built
-- **Milestones** - Define 3-5 sequential milestones:
+- **Milestones** - Define multiple sequential milestones (example):
   - M0: Foundation/scaffolding
   - M1: Core functionality
   - M2: Advanced features
