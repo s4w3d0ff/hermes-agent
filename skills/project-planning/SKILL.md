@@ -17,7 +17,7 @@ metadata:
 - Establishing clear project goals and verification criteria
 - Creating task-level plans with test cases
 
-## Project Milestones File- `{projectroot}/.hermes/MILESTONES.md`
+##S Project Milestones File- `{projectroot}/.hermes/MILESTONES.md`
 
 A high-level project overview document that:
 
@@ -27,7 +27,7 @@ A high-level project overview document that:
 - For each milestone, includes a goal and verification checklist
 - Serves as the source of truth for project scope
 
-### Questions to Ask
+#### **Questions to Ask**
 
 1. **Project Identity**: What is the project name, purpose, and where is it located?
 2. **Structure**: What is the expected file/directory layout?
@@ -35,7 +35,7 @@ A high-level project overview document that:
 4. **Overview**: What is the high-level flow? What are the main functions/modules/components?
 5. **Milestones**: What are the sequential milestones needed to complete the project?
 
-### Format:
+#### **Format:**
 
 ```markdown
 # {Project Name} - ({project root location}) - [{github url}]
@@ -55,7 +55,7 @@ A high-level project overview document that:
 {verifiable list of minimum expected deliverables, expected behaviors and function results, tests, no regression, full integration with project, etc}
 ```
 
-### Content Guidelines
+#### **Content Guidelines**
 
 - **Project Name**: Use the format `{Project Name} - ({project root location}) - [{github url}]`
 - **Project Structure**: Show expected directory tree or file layout (e.g., `src/`, `tests/`, `docs/`)
@@ -68,14 +68,15 @@ A high-level project overview document that:
   - High-level purpose in 2-3 sentences
   - Expected data flow or workflow
   - Key functions, methods, or modules to be built
-- **Milestones** - Define multiple sequential milestones (example):
+- **Milestones** - Define multiple sequential milestones (0-?):
   - M0: Foundation/scaffolding
   - M1: Core functionality
-  - M2: Advanced features
-  - M3: Integration/polish
-  - M4: Optimization/documentation (if applicable)
+  - M2: Features
+  - M3: Features
+  - M4: Features
+  - M5: ...
 
-#### Verification for Each Milestone
+#### **Verification for Each Milestone**
 
 Include a checklist of verifiable deliverables:
 
@@ -85,7 +86,7 @@ Include a checklist of verifiable deliverables:
 - Integration requirements
 - No regressions in existing functionality
 
-#### Best Practices
+#### **Best Practices**
 
 1. **Be Specific**: Use concrete names and paths, not placeholders
 2. **Realistic Scope**: Milestones should be achievable in 1-2 weeks of work
@@ -102,14 +103,14 @@ A detailed breakdown of a specific milestone that:
 - Includes acceptance criteria and test examples for each task
 - Acts as the execution guide for developers
 
-#### Questions to Ask
+#### **Questions to Ask**
 
 1. **Scope**: What exactly needs to be delivered in this milestone?
 2. **Dependencies**: Are there other milestones or tasks that must complete first?
 3. **Phases**: How can this milestone logically break down into sequential phases?
 4. **Tasks**: What are the smallest unit tasks that can be tested independently?
 
-### Format:
+#### **Format:**
 
 ```markdown
 # {milestone} Plan - `{milestone}_PLAN.md`
@@ -131,7 +132,7 @@ A detailed breakdown of a specific milestone that:
 
 ```
 
-#### Content Guidelines
+#### **Content Guidelines**
 
 - **Goal**: Restate and expand the goal from `MILESTONES.md` with implementation context
 - **Phases**: Divide the milestone into 2-4 logical phases:
@@ -144,7 +145,7 @@ A detailed breakdown of a specific milestone that:
   - Include 2-4 verification checkboxes per task
   - Each checkbox should be a concrete, testable criterion
 
-#### Task Verification Criteria
+#### **Task Verification Criteria**
 
 Each task verification should answer:
 
@@ -153,7 +154,7 @@ Each task verification should answer:
 - **Tested**: Is it covered by tests or manual verification?
 - **Integrated**: Does it work with other components?
 
-### Best Practices
+#### **Best Practices**
 
 1. **Atomic Tasks**: Each task should be completable in 2-4 hours
 2. **Testable**: Every verification should be runnable or verifiable
