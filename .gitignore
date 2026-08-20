@@ -25,6 +25,7 @@ channel_directory.json
 .clean_shutdown
 .no-bundled-skills
 .skills_prompt_snapshot.json
+.usage.json
 .update_check
 .curator_state
 .scratch_tip_shown
