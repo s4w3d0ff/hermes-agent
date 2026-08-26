@@ -1,84 +1,13 @@
 model:
-  provider: lmstudio
-  default: qwen3.6-35b-a3b
+  provider: custom
   base_url: http://192.168.1.232:1234/v1
-  context_length: 256000
+  default: qwen3.8-27b
+  context_length: 128000
 fallback_providers:
   - provider: openrouter
-    model: openai/gpt-oss-20b:free
-    context_length: 256000
-  - provider: openrouter
-    model: free
-    context_length: 200000
+    model: openrouter/free
 credential_pool_strategies:
   openrouter: round_robin
-toolsets:
-  - hermes-cli
-  - kanban
-  - skills
-  - terminal
-  - clarify
-  - project
-  - memory
-  - discord
-  - context_engine
-  - session_search
-  - web
-  - browser
-agent:
-  max_turns: 42000
-  tool_use_enforcement: true
-  max_verify_nudges: 6
-  clarify_timeout: 4200
-  disabled_toolsets:
-    - delegation
-    - computer_use
-    - vision
-  verbose: true
-  reasoning_effort: xhigh
-terminal:
-  backend: local
-  cwd: '~'
-  timeout: 360
-  home_mode: auto
-  persistent_shell: true
-web:
-  backend: ddgs
-  use_gateway: false
-browser:
-  inactivity_timeout: 120
-  cloud_provider: camofox
-  use_gateway: false
-context_file_max_chars: 50000
-file_read_max_chars: 200000
-tool_output:
-  max_bytes: 150000
-  max_lines: 5000
-tool_loop_guardrails:
-  warnings_enabled: true
-  hard_stop_enabled: false
-  warn_after:
-    exact_failure: 2
-    same_tool_failure: 3
-    idempotent_no_progress: 3
-  hard_stop_after:
-    exact_failure: 4
-    same_tool_failure: 5
-    idempotent_no_progress: 5
-compression:
-  enabled: true
-  threshold: 0.9
-  target_ratio: 0.6
-  protect_last_n: 25
-  protect_first_n: 10
-kanban:
-  dispatch_in_gateway: true
-  orchestrator_profile: shamu
-  default_assignee: researcher
-  auto_decompose: true
-  max_in_progress: 2
-prompt_caching:
-  cache_ttl: 2m
 auxiliary:
   vision:
     provider: openrouter
@@ -95,35 +24,73 @@ auxiliary:
   curator:
     provider: openrouter
     model: nvidia/nemotron-3-ultra-550b-a55b:free
-display:
-  compact: false
-  resume_display: full
-  busy_input_mode: steer
-  bell_on_complete: false
-  show_reasoning: true
-  streaming: true
-  timestamps: true
-  show_cost: true
-  skin: default
-  language: en
-  interim_assistant_messages: true
-  show_commentary: true
-  tool_progress_command: true
-  tool_preview_length: 0
-  platforms:
-    telegram:
-      streaming: false
-  tool_progress: verbose
-  cleanup_progress: true
-  long_running_notifications: true
-  busy_ack_detail: true
-  background_process_notifications: all
-dashboard:
-  show_token_analytics: true
-stt:
-  enabled: false
+toolsets:
+  - hermes-cli
+  - clarify
+  - project
+  - kanban
+  - context_engine
+  - discord
+  - discord_admin
+platforms:
+  discord:
+    enabled: true
+platform_toolsets:
+  cli:
+    - hermes-cli
+    - clarify
+    - project
+    - kanban
+    - context_engine
+    - discord
+    - discord_admin
+  discord:
+    - hermes-cli
+    - clarify
+    - project
+    - kanban
+    - context_engine
+    - discord
+    - discord_admin
+agent:
+  max_turns: 4200
+  max_verify_nudges: 6
+  verbose: true
+  reasoning_effort: high
+  clarify_timeout: 4200
+  tool_use_enforcement: true
+  disabled_toolsets:
+    - code_execution
+    - cronjob
+    - browser
+    - web
+    - delegation
+    - computer_use
+    - vision
+    - video
+    - image_gen
+    - video_gen
+    - tts
+    - homeassistant
+    - yuanbao
+    - spotify
+    - feishu_doc
+    - feishu_drive
+    - x_search
+kanban:
+  dispatch_in_gateway: false
+discord:
+  unauthorized_dm_behavior: ignore
+  allowed_channels: '1518715078608683088'
+  auto_thread: false
+  bots_require_inline_mention: true
+  approval_mentions: true
+  voice_fx:
+    ambient_enabled: false
 context:
   engine: compressor
+context_file_max_chars: 50000
+file_read_max_chars: 200000
 memory:
   memory_enabled: true
   user_profile_enabled: true
@@ -131,23 +98,91 @@ memory:
   user_char_limit: 4375
   nudge_interval: 10
   flush_min_turns: 6
-delegation:
-  max_iterations: 50
-goals:
-  max_turns: 420
+compression:
+  enabled: true
+  threshold: 0.9
+  target_ratio: 0.6
+  protect_last_n: 25
+  protect_first_n: 10
+display:
+  compact: false
+  busy_input_mode: steer
+  bell_on_complete: false
+  show_reasoning: true
+  streaming: true
+  skin: horus
+  interim_assistant_messages: true
+  tool_progress: verbose
+  tool_progress_command: true
+  tool_preview_length: 0
+  show_commentary: true
+  show_cost: true
+  timestamps: true
+  resume_display: full
+  cleanup_progress: true
+  long_running_notifications: true
+  busy_ack_detail: true
+  background_process_notifications: all
+  language: en
 skills:
   guard_agent_created: true
   write_approval: false
   creation_nudge_interval: 15
-discord:
-  allowed_channels: '1518715078608683088'
-  auto_thread: false
-  bots_require_inline_mention: true
-  approval_mentions: true
-  voice_fx:
-    ambient_enabled: false
-  unauthorized_dm_behavior: ignore
+terminal:
+  backend: local
+  timeout: 360
+  home_mode: auto
+  cwd: '~'
+  persistent_shell: true
+tool_output:
+  max_bytes: 150000
+  max_lines: 5000
+tool_loop_guardrails:
+  warnings_enabled: true
+  hard_stop_enabled: false
+  warn_after:
+    exact_failure: 2
+    same_tool_failure: 3
+    idempotent_no_progress: 3
+  hard_stop_after:
+    exact_failure: 4
+    same_tool_failure: 5
+    idempotent_no_progress: 5
+goals:
+  max_turns: 420
+web:
+  backend: ddgs
+  use_gateway: false
+browser:
+  inactivity_timeout: 120
+  cloud_provider: camofox
+  use_gateway: false
+prompt_caching:
+  cache_ttl: 2m
+stt:
+  enabled: false
+delegation:
+  max_iterations: 50
+code_execution:
+  timeout: 360
+  max_tool_calls: 200
+onboarding:
+  seen:
+    tool_progress_prompt: true
+    profile_build_offered: true
+    busy_input_prompt: true
+updates:
+  pre_update_backup: false
+  backup_keep: 5
+  non_interactive_local_changes: stash
+_config_version: 33
+session_reset:
+  mode: none
+  idle_minutes: 1440
+  at_hour: 4
+group_sessions_per_user: true
 approvals:
+  destructive_slash_confirm: false
   deny:
     - hermes *chat*
     - hermes profile use*
@@ -233,90 +268,11 @@ approvals:
     - setenforce 0
     - aa-disable *
     - apparmor_parser -R *
-  destructive_slash_confirm: false
-code_execution:
-  timeout: 360
-  max_tool_calls: 100
-onboarding:
-  seen:
-    tool_progress_prompt: true
-    profile_build_offered: true
-    busy_input_prompt: true
-updates:
-  pre_update_backup: false
-  backup_keep: 5
-  non_interactive_local_changes: stash
-_config_version: 33
-platforms:
-  discord:
-    enabled: false
-platform_toolsets:
-  cli:
-    - hermes-cli
-    - kanban
-    - skills
-    - terminal
-    - clarify
-    - project
-    - memory
-    - discord
-    - context_engine
-    - session_search
-  discord:
-    - hermes-cli
-    - kanban
-    - skills
-    - terminal
-    - clarify
-    - project
-    - memory
-    - discord
-    - context_engine
-    - session_search
-session_reset:
-  mode: none
-  idle_minutes: 1440
-  at_hour: 4
-group_sessions_per_user: true
 plugins:
   enabled:
+    - caveman_native
     - ponytail
-  disabled: []
-
-# ── Security ──────────────────────────────────────────────────────────
-# Secret redaction is ON by default — strings that look like API keys,
-# tokens, and passwords are masked in tool output, logs, and chat
-# responses before the model or user ever sees them. Set redact_secrets
-# to false to disable (e.g. when developing the redactor itself).
-# tirith pre-exec scanning is enabled by default when the tirith binary
-# is available. Configure via security.tirith_* keys or env vars
-# (TIRITH_ENABLED, TIRITH_BIN, TIRITH_TIMEOUT, TIRITH_FAIL_OPEN).
-#
-# security:
-#   redact_secrets: true
-#   tirith_enabled: true
-#   tirith_path: "tirith"
-#   tirith_timeout: 5
-#   tirith_fail_open: true
-
-# ── Fallback Model ────────────────────────────────────────────────────
-# Automatic provider failover when primary is unavailable.
-# Uncomment and configure to enable. Triggers on rate limits (429),
-# overload (529), service errors (503), or connection failures.
-#
-# Supported providers:
-#   openrouter   (OPENROUTER_API_KEY)  — routes to any model
-#   openai-codex (OAuth — hermes auth) — OpenAI Codex
-#   nous         (OAuth — hermes auth) — Nous Portal
-#   zai          (ZAI_API_KEY)         — Z.AI / GLM
-#   kimi-coding  (KIMI_API_KEY)        — Kimi / Moonshot
-#   kimi-coding-cn (KIMI_CN_API_KEY)   — Kimi / Moonshot (China)
-#   minimax      (MINIMAX_API_KEY)     — MiniMax
-#   minimax-cn   (MINIMAX_CN_API_KEY)  — MiniMax (China)
-#   bedrock      (AWS IAM / boto3)     — AWS Bedrock (Converse API)
-#
-# For custom OpenAI-compatible endpoints, add base_url and key_env.
-#
-# fallback_model:
-#   provider: openrouter
-#   model: anthropic/claude-sonnet-4
+mcp_servers:
+  caveman-native:
+    command: /home/s4w3d0ff/.caveman/bin/caveman-mcp
+    enabled: true

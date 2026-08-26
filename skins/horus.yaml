@@ -1,0 +1,260 @@
+# Hermes skin: horus — desert dusk with Eye of Horus accents.
+# Gold, ochre and papyrus cream on dark dune brown; Egyptian turquoise for water.
+# All emoji replaced by verified hieroglyphs (Gardiner codes in comments).
+
+name: horus
+description: Desert dusk — gold, ochre and turquoise with Eye of Horus accents
+
+colors:
+  # Base surface — dark dune at night; everything else derives from it.
+  background: "#241A0E"
+
+  # Brand accent + headings — gilded papyrus gold.
+  ui_accent: "#E6A93F"
+  banner_accent: "#E6A93F"
+  banner_title: "#FFD97D"
+
+  # Text hierarchy — papyrus cream body, sand-muted secondaries.
+  banner_text: "#F2E4C8"
+  ui_text: "#F2E4C8"
+  prompt: "#F2E4C8"
+  ui_label: "#D9B36A"
+  banner_dim: "#9A7B4F"
+
+  # Borders, rules, gutters — dark bronze/ochre.
+  banner_border: "#7A5C2E"
+  ui_border: "#7A5C2E"
+  input_rule: "#7A5C2E"
+  response_border: "#D9A441"
+
+  # Semantic status — date-palm green, ochre amber, terracotta red.
+  ui_ok: "#6EA153"
+  ui_warn: "#D98E2B"
+  ui_error: "#C7503F"
+
+  # Tool-call markers + reasoning text.
+  ui_tool: "#FFCB4D"
+  ui_thinking: "#B08A4F"
+
+  # Status bar.
+  status_bar_bg: "#1C1309"
+  status_bar_text: "#D8C69B"
+  status_bar_strong: "#FFD97D"
+  status_bar_dim: "#8A6F42"
+  status_bar_good: "#6EA153"
+  status_bar_warn: "#D98E2B"
+  status_bar_bad: "#CE6A3F"
+  status_bar_critical: "#C13B2E"
+
+  # Session + selection chrome.
+  session_label: "#D9B36A"
+  session_border: "#8A6F42"
+  selection_bg: "#503B1D"
+  voice_status_bg: "#1C1309"
+  shell_dollar: "#4EC9B0"   # Egyptian turquoise — the one cool accent
+
+  # Completion menu.
+  completion_menu_bg: "#2E2110"
+  completion_menu_current_bg: "#4A371C"
+  completion_menu_meta_bg: "#2E2110"
+  completion_menu_meta_current_bg: "#4A371C"
+
+  # Diffs (dark-polarity line tints + bright word foregrounds).
+  diff_added: "#374A21"
+  diff_removed: "#5A2E22"
+  diff_added_word: "#A8D06B"
+  diff_removed_word: "#EE8A6B"
+
+  # Code syntax.
+  syntax_string: "#4EC9B0"
+  syntax_number: "#F2E4C8"
+  syntax_keyword: "#FFD97D"
+  syntax_comment: "#9A7B4F"
+
+# Hand-tuned light-terminal variant — papyrus cream with dark ochre ink.
+light_colors:
+  background: "#EFE3C8"
+  ui_accent: "#8A5A12"
+  banner_accent: "#8A5A12"
+  banner_title: "#7A4A0E"
+  banner_text: "#3E2C10"
+  ui_text: "#3E2C10"
+  prompt: "#3E2C10"
+  ui_label: "#7A5218"
+  banner_dim: "#8A7448"
+  banner_border: "#A98F5C"
+  ui_border: "#A98F5C"
+  input_rule: "#A98F5C"
+  response_border: "#8A5A12"
+  ui_ok: "#4A7031"
+  ui_warn: "#A06008"
+  ui_error: "#9C3A22"
+  ui_tool: "#8A5A12"
+  ui_thinking: "#7A5B2A"
+  status_bar_bg: "#E3D5B0"
+  status_bar_text: "#4A3A1E"
+  status_bar_strong: "#7A4A0E"
+  status_bar_dim: "#8A7448"
+  status_bar_good: "#4A7031"
+  status_bar_warn: "#A06008"
+  status_bar_bad: "#9C4522"
+  status_bar_critical: "#8F2F1A"
+  session_label: "#7A5218"
+  session_border: "#8A7448"
+  selection_bg: "#D9C79A"
+  voice_status_bg: "#E3D5B0"
+  shell_dollar: "#1F6E5C"
+  completion_menu_bg: "#E8DBBB"
+  completion_menu_current_bg: "#D6C493"
+  completion_menu_meta_bg: "#E8DBBB"
+  completion_menu_meta_current_bg: "#D6C493"
+  diff_added: "#DCE8C2"
+  diff_removed: "#EBCFC5"
+  diff_added_word: "#3F6B2A"
+  diff_removed_word: "#9C3A22"
+  syntax_string: "#1F6E5C"
+  syntax_number: "#3E2C10"
+  syntax_keyword: "#7A4A0E"
+  syntax_comment: "#8A7448"
+
+# Spinner — owl waits, Eye of Horus thinks. Glyphs verified against the
+# Unicode Egyptian Hieroglyphs chart (Gardiner codes in comments).
+spinner:
+  waiting_faces:
+    - "(𓅓)"   # G17 owl — it watches while you wait
+    - "(𓊽)"   # R11 djed pillar — stability
+    - "(𓋹)"   # S34 ankh — life
+  thinking_faces:
+    - "(𓂀)"   # D10 Eye of Horus (udjat)
+    - "(𓆄)"   # H6 feather of Maat — truth/pondering
+    - "(𓁛)"   # C2 falcon god with sun-disk and ankh — Ra/Horus
+  thinking_verbs:
+    - "decreeing"
+    - "inscribing"
+    - "divining"
+    - "weighing the heart"
+  wings:
+    - ["𓌀", "𓌀"]   # S40 was-scepter, power/dominion
+    - ["𓂀", "𓂀"]   # D10 Eye of Horus
+
+branding:
+  agent_name: Horus
+  welcome: "𓂀 The Eye of Horus watches over your work. Speak."
+  goodbye: "May Maat keep your path true. 𓋹"
+  response_label: " 𓁛 Horus 𓁛"
+  prompt_symbol: "𓂀"   # D10 Eye of Horus replaces the ❯
+  help_header: "𓊽 Commands — the djed stands firm"
+
+# Tool-output line prefix (default is ┊). Djed pillar: stability.
+tool_prefix: "𓊽"
+
+# Per-tool glyph overrides — replaces every emoji in spinners and progress.
+# Motif key:  𓂀 D10 Eye of Horus = see/preview      𓅓 G17 owl = watchful seeking
+#             𓀀 A01 reed/papyrus = records/text     𓊽 R11 djed = structure, done, steady
+#             𓋹 S34 ankh = life/create              𓂓 D28 ka (upraised arms) = voice/spirit/double
+#             𓆄 H6 feather of Maat = truth/weighing 𓁛 C2 falcon god w/ sun-disk = bird/art/divine
+#             𓌀 S40 was-scepter = power/command     𓋾 S38 crook (ḥqꜣ) = direct/shape/control
+#             𓈖 N35 water ripples = flow/web/Nile   𓉑 O1A House of Life = home/place of images
+#             𓌇 T001 plaited band (follower) = binding/joining/group
+tool_emojis:
+  # core shell & files
+  terminal: "𓌀"           # S40 was-scepter — power to act
+  read_terminal: "𓀀"      # A01 papyrus — reading the record
+  close_terminal: "𓊽"     # R11 djed — stands still, closed
+  execute_code: "𓆓"       # I10 cobra in repose — python
+  process: "𓊽"            # R11 djed — machinery stands firm
+  read_file: "𓀀"          # A01 papyrus scroll
+  write_file: "𓀀"         # A01 papyrus
+  patch: "𓋾"              # S38 crook — direct/shape the text
+  search_files: "𓅓"       # G17 owl — watchful seeking
+  session_search: "𓆄"     # H6 Maat feather — weighing what was said
+  skill_view: "𓀀"         # A01 papyrus scroll of procedure
+  skills_list: "𓀀"        # A01 papyrus
+  skill_manage: "𓊽"       # R11 djed — uphold and maintain
+  memory: "𓂓"             # D28 ka — the double that remembers
+  clarify: "𓆄"            # H6 feather of Maat — weigh the question
+  todo: "𓀀"               # A01 papyrus ledger
+  tour: "𓈖"               # N35 ripples — journey down the Nile
+  cronjob: "𓊽"            # R11 djed — it stands, on schedule
+  delegate_task: "𓂓"      # D28 ka — your double acts for you
+  text_to_speech: "𓂓"     # D28 ka — the voice is spirit
+  react_to_message: "𓂓"   # D28 ka — spirit in reply
+
+  # kanban
+  kanban_show: "𓀀"        # A01 papyrus record
+  kanban_list: "𓀀"        # A01 papyrus ledger
+  kanban_create: "𓋹"      # S34 ankh — new life for the card
+  kanban_complete: "𓊽"    # R11 djed — done, it stands firm
+  kanban_block: "𓊽"       # R11 djed — stands still
+  kanban_unblock: "𓌀"     # S40 was-scepter — power released
+  kanban_comment: "𓂓"     # D28 ka voice
+  kanban_heartbeat: "𓋹"   # S34 ankh — pulse of life
+  kanban_attach: "𓌇"      # T001 plaited band — binding to the card
+  kanban_attachments: "𓌇" # T001 plaited band
+  kanban_attach_url: "𓌇"  # T001 plaited band
+  kanban_link: "𓌇"        # T001 plaited band — joining two cards
+  kanban_request_review: "𓂀"   # D10 Eye of Horus — look at this
+  kanban_request_changes: "𓋾"  # S38 crook — direct the rework
+
+  # browser & web
+  browser_navigate: "𓈖"    # N35 ripples — flow along the Nile/web
+  browser_back: "𓊽"        # R11 djed — stand still, return
+  browser_click: "𓌀"       # S40 was-scepter — act with power
+  browser_type: "𓀀"        # A01 papyrus — write the input
+  browser_press: "𓀀"       # A01 papyrus
+  browser_scroll: "𓊽"      # R11 djed — a reed bundle, like a scroll
+  browser_snapshot: "𓂀"    # D10 Eye of Horus — capture what it sees
+  browser_vision: "𓂀"      # D10 Eye of Horus
+  browser_console: "𓌀"     # S40 was-scepter — raw power channel
+  browser_cdp: "𓆄"         # H6 Maat feather — verification/truth
+  browser_dialog: "𓂓"      # D28 ka voice — speech bubble
+  browser_exec: "𓈖"        # N35 ripples
+  browser_get_images: "𓂀"  # D10 Eye of Horus
+  web_search: "𓅓"          # G17 owl — watchful seeking
+  web_extract: "𓀀"         # A01 papyrus — the record extracted
+  x_search: "𓁛"            # C2 falcon god — bird, like X's
+
+  # media & images
+  image_generate: "𓉑"      # O1A House of Life — where images are made
+  video_analyze: "𓂀"       # D10 Eye of Horus — watching the film
+  vision_analyze: "𓂀"      # D10 Eye of Horus
+  video_generate: "𓉑"      # O1A House of Life
+  xai_video_edit: "𓋾"      # S38 crook — shape it
+  xai_video_extend: "𓌀"    # S40 was-scepter — extend its reach
+
+  # previews, panes & windows
+  open_preview: "𓂀"        # D10 Eye of Horus — show me
+  close_preview: "𓊽"       # R11 djed — stands still
+  drive_preview: "𓌀"       # S40 was-scepter
+  read_preview: "𓅓"        # G17 owl — watchful inspection
+  focus_pane: "𓉑"          # O1A House of Life — the enclosure
+  read_window_below: "𓉑"   # O1A House of Life
+  apply_layout: "𓊽"        # R11 djed — structure
+
+  # home assistant & projects & groups
+  ha_call_service: "𓉑"     # O1A House of Life
+  ha_get_state: "𓉑"        # O1A House of Life
+  ha_list_entities: "𓀀"    # A01 papyrus ledger
+  ha_list_services: "𓀀"    # A01 papyrus ledger
+  project_create: "𓋹"      # S34 ankh — new life for the project
+  project_list: "𓀀"        # A01 papyrus ledger
+  project_switch: "𓈖"      # N35 ripples — flow to a new place
+  yb_query_group_info: "𓌇"   # T001 plaited band — the bound group
+  yb_query_group_members: "𓌇" # T001 plaited band
+  yb_search_sticker: "𓅓"     # G17 owl
+  yb_send_dm: "𓀀"            # A01 papyrus letter
+  yb_send_sticker: "𓁛"       # C2 falcon god — brand art
+
+  # messaging & misc
+  discord: "𓂓"             # D28 ka voice
+  discord_admin: "𓌀"       # S40 was-scepter — authority
+  setup_mcp: "𓌀"           # S40 was-scepter — plug in the power
+  computer_use: "𓌀"        # S40 was-scepter — full dominion
+
+  # previews (extra) & Feishu drive
+  annotate_preview: "𓀀"    # A01 papyrus — marking on the record
+  feishu_doc_read: "𓀀"     # A01 papyrus document
+  feishu_drive_add_comment: "𓂓"      # D28 ka voice
+  feishu_drive_list_comments: "𓂓"    # D28 ka voice
+  feishu_drive_list_comment_replies: "𓂓"   # D28 ka voice — replies are voices answering
+  feishu_drive_reply_comment: "𓂓"     # D28 ka voice

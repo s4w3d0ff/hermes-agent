@@ -6,6 +6,10 @@ env
 # Local files we dont want in the repo
 __pycache__/
 *.pyc
+*.tar*
+*.tar
+*.gz
+*.gz*
 *.db
 *.db*
 *.pid
@@ -32,6 +36,10 @@ channel_directory.json
 .hermes_history
 .hub/
 .worktrees/
+*/.curator_backups/*
+/.curator_backups/
+*/terminal-sessions/*
+/terminal-sessions/
 /lsp/
 /kanban/
 /node/

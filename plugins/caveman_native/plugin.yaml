@@ -1,0 +1,13 @@
+manifest_version: 1
+name: caveman_native
+version: "1.2.5"
+description: "Caveman native lifecycle bridge"
+provides_hooks:
+  - on_session_start
+  - pre_llm_call
+  - pre_tool_call
+  - post_tool_call
+  - pre_verify
+  - post_llm_call
+  - on_session_end
+  - on_session_finalize
