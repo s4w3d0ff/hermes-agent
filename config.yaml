@@ -110,14 +110,16 @@ display:
   show_commentary: true
   tool_progress_command: true
   tool_preview_length: 0
+  platforms:
+    telegram:
+      streaming: false
   tool_progress: verbose
   cleanup_progress: true
   long_running_notifications: true
   busy_ack_detail: true
   background_process_notifications: all
-  platforms:
-    telegram:
-      streaming: false
+dashboard:
+  show_token_analytics: true
 stt:
   enabled: false
 context:
@@ -276,8 +278,10 @@ session_reset:
   idle_minutes: 1440
   at_hour: 4
 group_sessions_per_user: true
-dashboard:
-  show_token_analytics: true
+plugins:
+  enabled:
+    - ponytail
+  disabled: []
 
 # ── Security ──────────────────────────────────────────────────────────
 # Secret redaction is ON by default — strings that look like API keys,
