@@ -1,29 +1,8 @@
 model:
-  provider: custom
-  base_url: http://192.168.1.232:1234/v1
   default: qwen3.8-27b
+  provider: lmstudio
+  base_url: http://127.0.0.1:8787/w/hermes/v1 # caveman proxy
   context_length: 128000
-fallback_providers:
-  - provider: openrouter
-    model: openrouter/free
-credential_pool_strategies:
-  openrouter: round_robin
-auxiliary:
-  vision:
-    provider: openrouter
-    model: google/gemma-4-26b-a4b-it:free
-  compression:
-    provider: openrouter
-    model: nvidia/nemotron-3-ultra-550b-a55b:free
-  title_generation:
-    provider: openrouter
-    model: google/gemma-4-26b-a4b-it:free
-  profile_describer:
-    provider: openrouter
-    model: google/gemma-4-26b-a4b-it:free
-  curator:
-    provider: openrouter
-    model: nvidia/nemotron-3-ultra-550b-a55b:free
 toolsets:
   - hermes-cli
   - clarify
@@ -34,7 +13,7 @@ toolsets:
   - discord_admin
 platforms:
   discord:
-    enabled: true
+    enabled: false
 platform_toolsets:
   cli:
     - hermes-cli
@@ -148,6 +127,9 @@ tool_loop_guardrails:
     exact_failure: 4
     same_tool_failure: 5
     idempotent_no_progress: 5
+telemetry:
+  shared_metrics:
+    enabled: false
 goals:
   max_turns: 420
 web:
@@ -156,7 +138,8 @@ web:
 browser:
   inactivity_timeout: 120
   cloud_provider: camofox
-  use_gateway: false
+  extension_control:
+    enabled: false
 prompt_caching:
   cache_ttl: 2m
 stt:

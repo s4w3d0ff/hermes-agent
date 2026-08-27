@@ -19,6 +19,7 @@ __pycache__/
 *.heartbeat
 active_profile
 gateway_state.json
+spawn-ledger.json
 web-ui-build-stamp.json
 processes.json
 provider_models_cache.json
@@ -31,13 +32,12 @@ channel_directory.json
 .skills_prompt_snapshot.json
 .usage.json
 .update_check
-.curator_state
+.curator*
+/.curator*
 .scratch_tip_shown
 .hermes_history
 .hub/
 .worktrees/
-*/.curator_backups/*
-/.curator_backups/
 */terminal-sessions/*
 /terminal-sessions/
 /lsp/
