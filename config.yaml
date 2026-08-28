@@ -1,7 +1,7 @@
 model:
   default: qwen3.8-27b
   provider: lmstudio
-  base_url: http://127.0.0.1:8787/w/hermes/v1 # caveman proxy
+  base_url: http://127.0.0.1:8787/w/hermes/v1
   context_length: 128000
 toolsets:
   - hermes-cli
@@ -145,7 +145,7 @@ prompt_caching:
 stt:
   enabled: false
 delegation:
-  max_iterations: 50
+  max_iterations: 250
 code_execution:
   timeout: 360
   max_tool_calls: 200
@@ -158,7 +158,7 @@ updates:
   pre_update_backup: false
   backup_keep: 5
   non_interactive_local_changes: stash
-_config_version: 33
+_config_version: 39
 session_reset:
   mode: none
   idle_minutes: 1440

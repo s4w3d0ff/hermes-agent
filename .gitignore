@@ -34,6 +34,7 @@ channel_directory.json
 .usage.json
 .update_check
 .bundled_manifest
+.npm_lock_hash*
 .curator*
 /.curator*
 .scratch_tip_shown
