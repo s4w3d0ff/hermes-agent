@@ -16,6 +16,7 @@ __pycache__/
 *.lock
 *.log
 *.bak*
+*.etag
 *.heartbeat
 active_profile
 gateway_state.json
@@ -32,6 +33,7 @@ channel_directory.json
 .skills_prompt_snapshot.json
 .usage.json
 .update_check
+.bundled_manifest
 .curator*
 /.curator*
 .scratch_tip_shown
