@@ -1,50 +1,50 @@
 name: horus
 description: Desert dusk - gold, ochre and turquoise with hieroglyph accents
-
 colors:
-  background: "#241A0E"
-  ui_accent: "#E6A93F"
-  banner_accent: "#E6A93F"
-  banner_title: "#FFD97D"
-  banner_text: "#F2E4C8"
-  ui_text: "#F2E4C8"
-  prompt: "#F2E4C8"
-  ui_label: "#D9B36A"
-  banner_dim: "#9A7B4F"
-  banner_border: "#7A5C2E"
-  ui_border: "#7A5C2E"
-  input_rule: "#7A5C2E"
-  response_border: "#D9A441"
-  ui_ok: "#6EA153"
-  ui_warn: "#D98E2B"
-  ui_error: "#C7503F"
-  ui_tool: "#FFCB4D"
-  ui_thinking: "#B08A4F"
-  status_bar_bg: "#1C1309"
-  status_bar_text: "#D8C69B"
-  status_bar_strong: "#FFD97D"
-  status_bar_dim: "#8A6F42"
-  status_bar_good: "#6EA153"
-  status_bar_warn: "#D98E2B"
-  status_bar_bad: "#CE6A3F"
-  status_bar_critical: "#C13B2E"
-  session_label: "#D9B36A"
-  session_border: "#8A6F42"
-  selection_bg: "#503B1D"
-  voice_status_bg: "#1C1309"
-  shell_dollar: "#4EC9B0"
-  completion_menu_bg: "#2E2110"
-  completion_menu_current_bg: "#4A371C"
-  completion_menu_meta_bg: "#2E2110"
-  completion_menu_meta_current_bg: "#4A371C"
-  diff_added: "#374A21"
-  diff_removed: "#5A2E22"
-  diff_added_word: "#A8D06B"
-  diff_removed_word: "#EE8A6B"
-  syntax_string: "#4EC9B0"
-  syntax_number: "#F2E4C8"
-  syntax_keyword: "#FFD97D"
-  syntax_comment: "#9A7B4F"
+  background: "#000000"
+  ui_accent: "#D7AF5F"
+  ui_primary: "#FFD75F"
+  banner_accent: "#D7AF5F"
+  banner_title: "#FFD75F"
+  banner_text: "#FFD7D7"
+  ui_text: "#FFD7D7"
+  prompt: "#FFD7D7"
+  ui_label: "#D7AF5F"
+  banner_dim: "#87875F"
+  banner_border: "#875F00"
+  ui_border: "#875F00"
+  input_rule: "#875F00"
+  response_border: "#D7AF5F"
+  ui_ok: "#5FAF5F"
+  ui_warn: "#D78700"
+  ui_error: "#D75F5F"
+  ui_tool: "#FFD75F"
+  ui_thinking: "#AF875F"
+  status_bar_bg: "#000000"
+  status_bar_text: "#D7D7AF"
+  status_bar_strong: "#FFD75F"
+  status_bar_dim: "#875F5F"
+  status_bar_good: "#5FAF5F"
+  status_bar_warn: "#D78700"
+  status_bar_bad: "#D75F5F"
+  status_bar_critical: "#AF5F00"
+  session_label: "#D7AF5F"
+  session_border: "#875F5F"
+  selection_bg: "#5F5F00"
+  voice_status_bg: "#000000"
+  shell_dollar: "#5F87AF"
+  completion_menu_bg: "#000000"
+  completion_menu_current_bg: "#5F5F00"
+  completion_menu_meta_bg: "#000000"
+  completion_menu_meta_current_bg: "#5F5F00"
+  diff_added: "#5F5F00"
+  diff_removed: "#5F0000"
+  diff_added_word: "#AFAF5F"
+  diff_removed_word: "#FF875F"
+  syntax_string: "#5F87AF"
+  syntax_number: "#FFD7D7"
+  syntax_keyword: "#FFD75F"
+  syntax_comment: "#87875F"
 spinner:
   waiting_faces:
     - "𓅓"
@@ -66,25 +66,25 @@ spinner:
     - "inscribing"
     - "divining"
     - "weighing the heart"
-  wings:
-    - ["𓁜", "𓁝"]
-    - ["𓁛", "𓁞"]
-    - ["𓁩", "𓁪"]
-    - ["𓂻", "𓂽"]
-    - ["𓊱", "𓊱"]
-    - ["𓄱", "𓄱"]
-    - ["𓇈", "𓇈"]
-    - ["𓇼", "𓇼"]
-    - ["𓈗", "𓈗"]
-    - ["𓉶", "𓉶"]
-    - ["𓉷", "𓉷"]
-    - ["𓊎", "𓊎"]
-    - ["𓊽", "𓊽"]
-    - ["𓋍", "𓋍"]
-    - ["𓋹", "𓋹"]
-    - ["𓂓", "𓂓"]
-    - ["𓆩", "𓆪"]
-    - ["𓆣", "𓆣"]
+  wings: 
+  - ["𓁜", "𓁝"]
+  - ["𓁛", "𓁞"]
+  - ["𓁩", "𓁪"]
+  - ["𓂻", "𓂽"]
+  - ["𓊱", "𓊱"]
+  - ["𓄱", "𓄱"]
+  - ["𓇈", "𓇈"]
+  - ["𓇼", "𓇼"]
+  - ["𓈗", "𓈗"]
+  - ["𓉶", "𓉶"]
+  - ["𓉷", "𓉷"]
+  - ["𓊎", "𓊎"]
+  - ["𓊽", "𓊽"]
+  - ["𓋍", "𓋍"]
+  - ["𓋹", "𓋹"]
+  - ["𓂓", "𓂓"]
+  - ["𓆩", "𓆪"]
+  - ["𓆣", "𓆣"]
 branding:
   agent_name: Horus
   welcome: "𓂀 The Eye of Horus watches over your work."
@@ -180,7 +180,6 @@ banner_logo: |
   [#000000]  [/][#875F5F]=[/][#5F5F00]::[/][#000000].     [/][#5F0000]:[/][#875F00]-[/][#AF875F]+[/][#D7875F]*[/][#AF8787]*[/][#87875F]+[/][#5F5F5F]:[/][#000000]     [/][#5F0000].[/][#AF5F00]=[/][#D7AF87]*[/][#875F5F]=[/][#000000]       [/][#AF5F00]+=[/][#D7875F]*[/][#5F5F5F]-[/][#000000]    [/][#5F0000].[/][#AF5F00]+=[/][#D7AF5F]*[/][#5F5F5F]:[/][#000000]    [/][#5F0000].[/][#AF5F00]+=[/][#D7875F]*[/][#5F5F5F]:[/][#000000].[/][#5F0000]..[/][#000000].[/][#875F00]-[/][#AF5F00]==[/][#D7AF87]#[/][#000000].    [/][#5F5F00]:[/][#AF5F00]+=[/][#D7AF87]#[/][#000000].  .[/][#AF5F00]=+=[/][#AF5F5F]=[/][#000000]      [/][#875F00]-[/][#AF5F00]==[/][#AF8787]*[/][#000000]     [/][#AF5F00]==[/][#AF5F5F]+[/][#AFAF87]*[/][#000000]     [/][#875F00]=[/][#AF5F00]=[/][#D7875F]+[/][#AF8787]*[/][#000000] .. .[/][#AF5F00]==[/][#D7875F]+[/][#878787]+[/][#000000]  [/]
   [#000000]   [/][#5F0000].[/][#5F5F5F]-[/][#875F5F]-===[/][#AF875F]+++[/][#875F5F]=[/][#5F5F5F]-[/][#000000].        .[/][#D7875F]+[/][#D7AFAF]#[/][#000000]        [/][#AF875F]+[/][#AF5F00]=[/][#D7AF5F]*[/][#5F5F5F]-[/][#000000]    [/][#5F0000].[/][#D7875F]+[/][#AF5F00]=[/][#D7AF87]*[/][#5F5F5F]-[/][#000000]    [/][#5F0000].[/][#AF875F]+[/][#D7875F]+[/][#AF875F]++[/][#D7875F]++++++[/][#AF5F00]=[/][#D7AF87]#[/][#000000].    [/][#5F5F00]:[/][#D7875F]+[/][#AF5F00]+[/][#D7AF87]#[/][#000000].    [/][#AF5F00]=[/][#AF875F]+++[/][#5F0000].[/][#000000]    [/][#875F00]-[/][#AF875F]+[/][#D7875F]+[/][#AF875F]+[/][#D7875F]++++++[/][#AF875F]+[/][#D7875F]+[/][#D7AF87]*[/][#000000]     [/][#875F00]-[/][#D7875F]++[/][#AF875F]+[/][#D7875F]++++++[/][#AF5F5F]+[/][#D7875F]+[/][#878787]+[/][#000000]  [/]
   [#000000]      ...               [/][#5F0000].[/][#5F5F00].[/][#000000]        [/][#5F5F00]:[/][#875F5F]==[/][#5F0000].[/][#000000]     [/][#5F5F5F]-[/][#875F5F]==[/][#000000].     [/][#5F5F5F]:[/][#875F5F]===========[/][#000000]      [/][#5F5F5F]-[/][#875F5F]==[/][#000000]      [/][#5F5F5F]-[/][#875F5F]==[/][#5F5F5F]-[/][#000000]     [/][#5F5F5F]-[/][#875F5F]==========[/][#5F5F5F]-[/][#000000]     .[/][#875F5F]=========-=[/][#5F5F5F]:[/][#000000]  [/]
-
 banner_hero: |
   [#000000]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣠⣤⣤⣤⣶⣦⣤⣤⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]
   [#000000]⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣶[/][#875F00]⣿[/][#FFD75F]⣿⣿[/][#D7AF5F]⣿[/][#AF875F]⣿[/][#AF5F5F]⣿⣿⣿⣿[/][#AF875F]⣿⣿[/][#D7AF5F]⣿[/][#FFD75F]⣿[/][#D7AF5F]⣿[/][#000000]⣦⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀[/]
