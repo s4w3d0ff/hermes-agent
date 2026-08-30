@@ -39,7 +39,6 @@ agent:
   clarify_timeout: 4200
   tool_use_enforcement: true
   disabled_toolsets:
-    - code_execution
     - cronjob
     - browser
     - web
