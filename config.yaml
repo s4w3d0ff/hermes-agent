@@ -1,16 +1,16 @@
 model:
   default: qwen3.8-27b
   provider: lmstudio
-  base_url: http://127.0.0.1:8787/w/hermes/v1
+  base_url: http://127.0.0.1:8787/w/hermes/v1 # caveman proxy
   context_length: 128000
 toolsets:
   - hermes-cli
   - clarify
   - project
-  - kanban
   - context_engine
   - discord
   - discord_admin
+  - kanban
 platforms:
   discord:
     enabled: false
@@ -39,6 +39,9 @@ agent:
   clarify_timeout: 4200
   tool_use_enforcement: true
   disabled_toolsets:
+    - discord
+    - discord_admin
+    - kanban
     - cronjob
     - browser
     - web
@@ -79,7 +82,7 @@ memory:
 compression:
   enabled: true
   threshold: 0.9
-  target_ratio: 0.6
+  target_ratio: 0.4
   protect_last_n: 25
   protect_first_n: 10
 display:
@@ -253,7 +256,6 @@ approvals:
 plugins:
   enabled:
     - caveman_native
-    - ponytail
 mcp_servers:
   caveman-native:
     command: /home/s4w3d0ff/.caveman/bin/caveman-mcp
