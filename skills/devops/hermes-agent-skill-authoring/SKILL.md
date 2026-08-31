@@ -55,8 +55,8 @@ Repo-standard shape (all fields expected, even where the validator doesn't enfor
 
 ```yaml
 ---
-name: my-skill-name               # lowercase, hyphens, ≤64 chars (MAX_NAME_LENGTH)
-description: Concise capability statement, under sixty chars.
+name: my-skill-name               # lowercase, hyphens
+description: Concise capability statement, ~ sixty chars.
 version: 0.1.0                    # semver; new skills start at 0.1.0
 author: Real Name (github-handle), Hermes Agent
 license: MIT
