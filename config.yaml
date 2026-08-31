@@ -43,8 +43,6 @@ agent:
     - discord_admin
     - kanban
     - cronjob
-    - browser
-    - web
     - delegation
     - computer_use
     - vision
@@ -91,7 +89,7 @@ display:
   bell_on_complete: false
   show_reasoning: true
   streaming: true
-  skin: hentai
+  skin: horus
   interim_assistant_messages: true
   tool_progress: verbose
   tool_progress_command: true
