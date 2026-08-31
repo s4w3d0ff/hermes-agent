@@ -1,7 +1,7 @@
 model:
   default: qwen3.8-27b
   provider: lmstudio
-  base_url: http://127.0.0.1:8787/w/hermes/v1 # caveman proxy
+  base_url: http://192.168.1.232:1234/v1
   context_length: 128000
 toolsets:
   - hermes-cli
@@ -253,10 +253,3 @@ approvals:
     - setenforce 0
     - aa-disable *
     - apparmor_parser -R *
-plugins:
-  enabled:
-    - caveman_native
-mcp_servers:
-  caveman-native:
-    command: /home/s4w3d0ff/.caveman/bin/caveman-mcp
-    enabled: true

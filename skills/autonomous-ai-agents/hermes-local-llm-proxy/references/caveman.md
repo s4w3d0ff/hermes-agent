@@ -4,6 +4,14 @@ Caveman (github.com/JuliusBrussee/caveman) has two installable halves:
 1. **Skill pack** ("save output") — terse-reply skills. `node bin/install.js --only hermes` copies 7 skill dirs into `~/.hermes/skills/productivity/`. No proxy involved; works standalone. Say "caveman mode" or `/caveman` in a new session.
 2. **Proxy** ("save input") — local OpenAI-compatible compression layer on loopback; shrinks context before the provider call. This is what this skill wires into Hermes.
 
+## State on this box (as of 2026-08-30)
+
+The proxy was detached and its systemd user unit removed at user request: caveman input-side compression did not work for hermes (it refused to compress streamed requests). Current state:
+- No `caveman-proxy` process, no service. Do NOT assume ports 8787/8790 exist or that `systemctl --user ... caveman-proxy` works.
+- Hermes talks directly: `model.base_url http://192.168.1.232:1234/v1` (see `~/.hermes/config.yaml`).
+- The skill pack and the native MCP plugin (`caveman_native`, tools `mcp__caveman_native__*`) remain active — output-side compression still works without depending on the proxy.
+- `~/.caveman/` data dir (binaries, ccr.db, caveman.yaml) was left in place; re-wiring means recreating the unit below + repointing `model.base_url`, nothing more.
+
 ## Key paths (this box)
 - Binaries: `~/.caveman/bin/caveman-proxy` (+ engine, mcp, shrink, browse, cavemem). Manifest: `~/.caveman/bin/.bin-manifest.json`.
 - **Proxy config:** `~/.caveman/caveman.yaml` (override path via `$CAVEMAN_CONFIG`). Absent file = shim forwards to hosted default.
@@ -56,8 +64,8 @@ Apply: `systemctl --user daemon-reload && systemctl --user enable --now caveman-
 ## Telemetry off
 Edit `~/.caveman-cloud/config.json`: `"telemetry": { "enabled": false, ... }`. Verify after any CLI run that might flip consent: read back `d['telemetry']['enabled'] is False`.
 
-## Rollback on this box (no uninstall)
-- Bypass: `hermes config set model.base_url http://192.168.1.232:1234/v1` then `systemctl --user stop caveman-proxy.service`.
+## Rollback / re-wiring on this box (no uninstall)
+- Bypass (already in place since 2026-08-30): `model.base_url` points directly at `http://192.168.1.232:1234/v1`; the caveman-proxy unit no longer exists. Re-wiring means recreating it per the template above + repointing base_url.
 - Pre-change config backup lives at `~/.hermes/backups/config.yaml.pre-caveman-<ts>.yaml`.
 
 ## Install (from a clone; avoids npm 12 arg-parsing quirks with the npx one-liner)
