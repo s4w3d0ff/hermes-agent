@@ -5,32 +5,11 @@ model:
   context_length: 128000
 toolsets:
   - hermes-cli
-  - clarify
   - project
   - context_engine
-  - discord
-  - discord_admin
-  - kanban
 platforms:
   discord:
     enabled: false
-platform_toolsets:
-  cli:
-    - hermes-cli
-    - clarify
-    - project
-    - kanban
-    - context_engine
-    - discord
-    - discord_admin
-  discord:
-    - hermes-cli
-    - clarify
-    - project
-    - kanban
-    - context_engine
-    - discord
-    - discord_admin
 agent:
   max_turns: 4200
   max_verify_nudges: 6
@@ -39,19 +18,22 @@ agent:
   clarify_timeout: 4200
   tool_use_enforcement: true
   disabled_toolsets:
+    # - web
+    # - browser
+    # - vision
+    # - code_execution
+    # - session_search
+    # - clarify
+    # - cronjob
     - discord
     - discord_admin
     - kanban
-    - cronjob
-    - browser
-    - web
+    - tts
     - delegation
     - computer_use
-    - vision
     - video
     - image_gen
     - video_gen
-    - tts
     - homeassistant
     - yuanbao
     - spotify
@@ -68,6 +50,12 @@ discord:
   approval_mentions: true
   voice_fx:
     ambient_enabled: false
+skills:
+  external_dirs:
+    - ~/.hermes/skills
+  guard_agent_created: true
+  write_approval: false
+  creation_nudge_interval: 15
 context:
   engine: compressor
 context_file_max_chars: 50000
@@ -81,8 +69,8 @@ memory:
   flush_min_turns: 6
 compression:
   enabled: true
-  threshold: 0.9
-  target_ratio: 0.4
+  threshold: 0.85
+  target_ratio: 0.36
   protect_last_n: 25
   protect_first_n: 10
 display:
@@ -91,7 +79,7 @@ display:
   bell_on_complete: false
   show_reasoning: true
   streaming: true
-  skin: horus
+  skin: sherlock
   interim_assistant_messages: true
   tool_progress: verbose
   tool_progress_command: true
@@ -105,10 +93,6 @@ display:
   busy_ack_detail: true
   background_process_notifications: all
   language: en
-skills:
-  guard_agent_created: true
-  write_approval: false
-  creation_nudge_interval: 15
 terminal:
   backend: local
   timeout: 360

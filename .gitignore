@@ -71,6 +71,7 @@ channel_directory.json
 /checkpoints/
 /sandboxes/
 /backups/
+/plugins/
 /cron/ticker_last_success
 /cron/ticker_heartbeat
 profiles/sysadmin/
