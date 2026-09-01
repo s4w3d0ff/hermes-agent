@@ -79,8 +79,8 @@ memory:
   flush_min_turns: 6
 compression:
   enabled: true
-  threshold: 0.9
-  target_ratio: 0.4
+  threshold: 0.75
+  target_ratio: 0.25
   protect_last_n: 25
   protect_first_n: 10
 display:
