@@ -75,6 +75,7 @@ channel_directory.json
 /cron/ticker_last_success
 /cron/ticker_heartbeat
 profiles/sysadmin/
+profiles/*/terminal-sessions/
 profiles/*/node/
 profiles/*/gateway/
 profiles/*/pairing/
