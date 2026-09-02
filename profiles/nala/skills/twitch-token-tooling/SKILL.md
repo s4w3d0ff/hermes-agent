@@ -51,7 +51,7 @@ from poolguy.core.storage import SQLiteStorage       # default db/twitch.db is g
 handler = TokenHandler(
     client_id=env["TWITCH_CLIENT_ID"],
     client_secret=env.get("TWITCH_CLIENT_SECRET"),
-    redirect_uri="http://localhost:5000/callback",   # must match a URL registered in the dev console for this app
+    redirect_uri="http://localhost:8080/callback",   # pool-guy's REGISTERED redirect (dev console) — verify against app registration, not repo docs
     scopes=["user:read:chat", "user:write:chat", "moderator:read:followers"],
     storage=SQLiteStorage(str(ROOT / "db" / "twitch.db")),
     browser={"librewolf": "/usr/bin/librewolf"},      # explicit path = deterministic GUI browser, no xdg guesswork
@@ -60,7 +60,7 @@ token = await handler.get_token()                     # saved token valid  -> va
 ```
 
 - **DISPLAY fallback**: the agent's shell may run on a tty session with no DISPLAY while the user's GUI runs on `:1`. Before launching any browser from your own shell, fall back to `os.environ.setdefault("DISPLAY", ":1")` when `/tmp/.X11-unix/X1` exists. The user's own terminal needs nothing.
-- **Keep the registered redirect port** (pool-guy: 5000) rather than picking a 'nicer' one like 8080 — it is already in the dev-console app registration, so zero console changes. A new port means updating OAuth Redirect URLs first.
+- **Redirect port must match the dev-console app registration** — for pool-guy that is `http://localhost:8080/callback`. The repo README and old smoke scripts carry a stale 5000 default; never trust it, check the app's registered OAuth Redirect URLs. An unregistered port means the callback never arrives.
 - **Test-run before handing off**: run the command yourself with `timeout ~20s` and confirm the browser process actually launches (pgrep the binary), then kill that test instance and verify the callback port is free again — only after that hand the user the SAME exact command. Same machine, so no 'run this on your laptop' framing.
 - The saved token in `db/twitch.db` IS the semi-permanent login: every later run validates/refreshes it instead of re-authing. Public-client refresh tokens are one-time-use with a 30-day TTL, so re-login is at most once per ~30 days via this same flow.
 
@@ -75,10 +75,9 @@ Real user tokens are reserved for explicit live smoke/regression runs (the one-s
 
 ## Semi-permanent dev token (agreed pattern)
 
-User wants a reusable test token so re-login isn't needed per test run. Pattern:
-1. Issue ONE user token with the FULL scope set any pool-guy test might need (`user:read:chat user:write:chat moderator:read:followers`), account must mod the target channel (GOTTEM, id 108284496).
-2. Persist `ACCESSTOKEN` + `REFRESHTOKEN` in a gitignored file OUTSIDE the repo (never commit); inject via the project's token-file env var.
-3. Let the app auto-refresh: public-client refresh tokens are one-time-use with 30-day TTL, so "semi-permanent" really means ~30 days of automated refresh from one login, then re-run `twitch token -u -s ...` and update the stored file.
+User wants a reusable test token so re-login isn't needed per test run. Pattern (pool-guy realizes it as committed `tools/oauth_login.py`):
+1. Issue ONE user token with the FULL scope set any pool-guy test might need (`user:read:chat user:write:chat moderator:read:followers`) via the project's own OAuth flow, so it lands in app storage (pool-guy: `db/twitch.db`, gitignored `/db/`; never commit). Tests target only the account's OWN channel — no external mod status needed.
+2. Let the app auto-refresh on every start (validate + scope check, refresh near expiry). Public-client refresh tokens are one-time-use with a 30-day TTL, so "semi-permanent" = ~30 days of automated refresh from ONE browser login; when the window lapses, re-run the same login tool once.
 
 ## Deriving scopes from what the test exercises
 
@@ -90,6 +89,8 @@ Map each live call in the smoke/regression script to its scope before asking the
 | Send Chat Message API (`/helix/chat/messages`) | `user:write:chat` | account may post in target channel (mod or open chat) |
 | Get Channel Followers, paginated | `moderator:read:followers` | token owner must be a MOD of the broadcaster being queried, else 403 |
 | Hourly validate + refresh cycle | none extra | just keep the refresh token |
+
+pool-guy standing rule (user): live tests only ever target channels OWNED by the logged-in test account — never external channels. Owning a channel makes you its moderator, so `moderator:read:followers` needs no external mod status.
 
 Then hand the user one exact command, e.g.:
 `twitch token -u -s "user:read:chat user:write:chat moderator:read:followers"`
@@ -119,6 +120,8 @@ Write the token as JSON matching what the project's storage layer expects (check
 - One-time-use public refresh tokens: if a long-lived test re-auths, the original refresh token is dead after first use; keep a copy of `REFRESHTOKEN` from issue time.
 - twitch-cli failing interactively on the user's GUI (root cause unknown to you) → do NOT go down a debugging rabbit hole in their GUI session. The project's own OAuth flow (section above) is an equally valid token source that exercises production code — pivot there instead of making the user chase CLI errors.
 - Never frame work as 'run this on your laptop/GUI machine': same system. You can and should execute it, verify the side effects (browser process spawned, port bound/freed), and hand back the exact command you verified.
+- Response-shape confusion when validating by hand: /validate returns `scopes` (a LIST) while token JSON and the authorize URL param use `scope` (space-joined string). Reading `v['scope']` off /validate yields None/KeyError and masquerades as "token has zero scopes" — this exact mixup burned several validation attempts in one session. Print raw response keys before interpreting.
+- Handoff style (user correction): deliver the verified command plus at most one line of what it does. Do not re-explain environment facts the user already stated (GUI exists, same machine) and do not narrate stale assumptions (headless host, wrong port) — verify before assuming; keep preamble near zero.
 
 ## Verification
 
