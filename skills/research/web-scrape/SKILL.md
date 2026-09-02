@@ -28,17 +28,17 @@ curl -s http://localhost:9377/health
 Expect: `{"ok":true, ...}`. If `browserConnected:false`, camofox server is up but no browser instance is attached, this is normal on first use; the first scrape will trigger a fresh browser launch.
 
 ### Install dependencies (one-time)
-The dependencies are installed in the hermes agent venv. Check they are present:
+The dependencies are installed in the hermes agent venv (`$HOME/.hermes/hermes-agent/venv`). Check they are present:
 ```bash
 ~/.hermes/hermes-agent/venv/bin/pip list | grep -E 'bs4|lxml|requests'
 ```
 
-If missing, install them in the hermes venv:
+If missing, install them in the hermes venv (beautifulsoup4 was added 2026-09 for camosoup; requests/lxml ship preinstalled):
 ```bash
-~/.hermes/hermes-agent/venv/bin/pip install requests beautifulsoup4 lxml
+~/.hermes/hermes-agent/venv/bin/pip install beautifulsoup4
 ```
 
-Do NOT create a local venv inside the skill folder. Always use the shared hermes agent venv.
+Do NOT create a local venv inside the skill folder. Always use the shared hermes agent venv. The `camosoup.sh` wrapper exports PYTHONPATH so `-m camosoup` resolves from its own scripts dir — if you invoke the module directly instead, set `PYTHONPATH=<skill>/scripts` yourself or it fails with "No module named camosoup".
 
 ## How to Run (use the wrapper)
 

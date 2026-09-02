@@ -110,21 +110,24 @@ def _find_content_area(soup: BeautifulSoup) -> Tag | None:
 
 def _inner_text(tag: Tag) -> str:
     """Extract text from a tag, stripping inner HTML but preserving inline formatting markers."""
-    # Walk the tag tree and extract text with simple inline markers
+    # Walk the tag tree and extract text with simple inline markers.
+    # Child text is NOT stripped per-child: stripping each fragment drops the
+    # spaces that separate sibling tags (e.g. <code><span>git</span> clone</code>
+    # would glue into "gitclone"). Whitespace runs are collapsed instead.
     parts = []
     for child in tag.children:
         if isinstance(child, str):
             parts.append(child)
         elif isinstance(child, Tag):
             if child.name in ("strong", "b"):
-                parts.append(f"**{child.get_text(strip=True)}**")
+                parts.append(f"**{child.get_text()}**")
             elif child.name in ("em", "i"):
-                parts.append(f"*{child.get_text(strip=True)}*")
+                parts.append(f"*{child.get_text()}*")
             elif child.name in ("code",):
-                parts.append(f"`{child.get_text(strip=True)}`")
+                parts.append(f"`{child.get_text()}`")
             else:
                 parts.append(_inner_text(child))
-    return "".join(parts).strip()
+    return re.sub(r"[ \t]+", " ", "".join(parts)).strip()
 
 
 def _extract_blocks(content: Tag, fmt: str = "text") -> list[dict]:
@@ -187,9 +190,10 @@ def _extract_blocks(content: Tag, fmt: str = "text") -> list[dict]:
             if text:
                 blocks.append({"type": "paragraph", "text": "> " + text})
 
-        # Code blocks
+        # Code blocks - preserve line structure; collapse space runs only so
+        # nested highlight spans don't glue words ("brew install", not "brewinstall")
         elif element.name in ("pre", "code"):
-            text = element.get_text(strip=True)
+            text = re.sub(r"[ \t]+", " ", element.get_text()).strip()
             if text:
                 blocks.append({"type": "code", "text": text})
 

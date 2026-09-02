@@ -11,6 +11,12 @@ metadata:
 ## REST api
 Entire complete REST api docs can be found in `references/api/references.md`
 
+## twitch-cli (local development tooling)
+Full docs for every page under dev.twitch.tv/docs/cli are scraped into `references/cli/`. Highlights:
+- `twitch token -u -s "scope1 scope2"` issues user tokens via a browser flow; the app's redirect URLs must include `http://localhost:3000` first. Config lives in `~/.config/twitch-cli/.twitch-cli.env`. See `references/cli/token-command.md`.
+- For offline dev/testing without real API calls or credentials, `mock-api` generates mock data and runs a local mock server; `event`/`websocket event` trigger fake EventSub events locally. See `references/cli/mock-api-command.md`, `event-command.md`, `websocket-event-command.md`.
+- `api <method> <template>` calls the real API with the configured token — use it for manual endpoint verification. See `references/cli/api-command.md`.
+
 ## OAuth Authentication
 
 Twitch uses OAuth 2.0 with two token types: **user access tokens** (for user-specific data) and **app access tokens** (for non-sensitive data).
@@ -346,6 +352,15 @@ references/
 │   └── eventsub-subscription-types.md # All event types with payloads
 ├── api/
 │   └── reference.md                   # Helix API reference
+├── cli/                               # twitch-cli docs (dev.twitch.tv/docs/cli)
+│   ├── index.md                       # Install, usage overview, contributing
+│   ├── configure-command.md           # Client ID/secret configuration (~/.config/twitch-cli/)
+│   ├── token-command.md               # App/user access tokens, -u/-s flags, revocation
+│   ├── api-command.md                 # Call real API endpoints (get/post/put/patch/delete)
+│   ├── mock-api-command.md            # Mock data + local mock server for offline dev/testing
+│   ├── event-command.md               # Trigger/retrigger webhook events locally, challenge verification
+│   ├── websocket-event-command.md     # WebSocket start-server, reconnect/close simulation
+│   └── version-command.md             # Print CLI version
 └── chat/
     ├── index.md                       # Chatbot overview, types, rate limits
     ├── authenticating.md              # Chatbot auth (user/app tokens, channel:bot)

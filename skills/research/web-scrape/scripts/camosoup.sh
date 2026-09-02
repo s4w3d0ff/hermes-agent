@@ -4,6 +4,9 @@ set -euo pipefail
 # Resolve script directory (works even if symlinked)
 SCRIPT_DIR="$(cd "$(dirname -- "$0")" && pwd)"
 
+# camosoup lives in this scripts dir; -m resolution needs it on PYTHONPATH
+export PYTHONPATH="$SCRIPT_DIR${PYTHONPATH:+:$PYTHONPATH}"
+
 # Use the hermes agent venv's Python so all deps are available
 VENV_PYTHON="$HOME/.hermes/hermes-agent/venv/bin/python3"
 
