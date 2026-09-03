@@ -20,6 +20,7 @@ metadata:
 - Use conventional commit messages: `feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `ci:`, `chore:`
 - Stage only files relevant to each commit with `git add <specific-files>`
 - Never force stage/commit files that are included in the .gitignore, they are ignored for a reason.
+- Never reference untracked files when creating commit messages or pr titles/descriptions. Example: `Covers all 16 planned tasks from .hermes/PLAN.md` while `.hermes` is not tracked and in the `.gitignore`. Don't do this.
 
 ## Core Development Design Principles
 
