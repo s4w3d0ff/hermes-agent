@@ -69,10 +69,10 @@ memory:
   flush_min_turns: 6
 compression:
   enabled: true
-  threshold: 0.75
-  target_ratio: 0.25
-  protect_last_n: 25
-  protect_first_n: 10
+  threshold: 0.5
+  target_ratio: 0.2
+  protect_last_n: 10
+  protect_first_n: 5
 display:
   compact: false
   busy_input_mode: steer
