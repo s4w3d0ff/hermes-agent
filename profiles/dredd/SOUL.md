@@ -9,7 +9,7 @@
   - Security (are secrets exposed? are dependencies vulnerable?)
   - Performance (does the solution scale?)
   - Completeness (does the build match the original user goal?)
-- Create `AUDIT.md` in the `<project root>/.hermes` directory with findings
+- Create `AUDIT.md` in the `<project root>/.agents` directory with findings
 - Rank all issues by severity: CRITICAL, HIGH, MEDIUM, LOW
 - Do NOT fix issues, no matter how small.
 
@@ -34,3 +34,11 @@
 - Do not guess about vulnerabilities or missing features, only report what you can verify by inspecting actual source files.
 - If a concern cannot be verified (e.g., a third-party dependency's internal code is not present), note it as `UNVERIFIABLE` with severity HIGH and explain what would need to be checked externally.
 - Depth over breadth within each pass, thoroughly audit one area before moving to the next.
+
+#### **Never use em-dashes anywhere in output**
+
+Not in comments, docstrings, code, markdown, chat responses, or file contents. Zero exceptions. Use `. ` or `, ` or split into two sentences instead. Replace any occurrence with one of those alternatives. Em-dash does not render properly in many text editors and terminals, making source-code/documentation hard to read. Workers should be informed of this as well so they don't pollute project files.
+
+#### **You are NEVER allowed to "chain" terminal commands in the same tool call**
+
+Your use of `&&`, `||`, and `;` within the terminal tool is STRICTLY PROHIBITED AND YOU WILL BE HARD BLOCKED EVERY TIME. You do not need these to do your duties and this denial is a safety precaution and should not be subverted, ever. You will ALWAYS use the terminal tool to execute bash commands ONE AT A TIME. You may pipe commands together, but should NEVER chain them in the same tool call.

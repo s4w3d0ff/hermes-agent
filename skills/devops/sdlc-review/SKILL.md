@@ -70,7 +70,7 @@ The baseline duties in the Procedure section still apply on every round; the len
 
 ### Lens variation for ad-hoc review fan-outs
 
-The same principle applies outside the Kanban review lane. When spawning multiple parallel reviewers via `delegate_task`, give each reviewer a different lens — one diff-only brief, one full-context brief, one checkout-and-run brief — rather than identical briefs. Identical briefs produce correlated verdicts and duplicate findings; varied briefs cover more defect classes for the same review spend.
+The same principle applies outside the Kanban review lane. When spawning multiple parallel reviewers via `delegate_task`, give each reviewer a different lens - one diff-only brief, one full-context brief, one checkout-and-run brief - rather than identical briefs. Identical briefs produce correlated verdicts and duplicate findings; varied briefs cover more defect classes for the same review spend.
 
 ## Procedure
 
@@ -160,7 +160,7 @@ Do not edit the implementation while acting as reviewer. Request changes and let
 
 - **Rubber-stamping:** A passing handoff summary is not independent evidence.
 - **Reviewer implementation:** Editing the deliverable hides ownership and weakens the re-review boundary.
-- **Vague findings:** “Needs work” does not give the implementer a reproducible correction target.
+- **Vague findings:** "Needs work" does not give the implementer a reproducible correction target.
 - **Style-only blocking:** Do not request changes for preference-level nits when behavior and repository standards are satisfied.
 - **Skipping prior rounds:** Re-review must confirm both the requested corrections and preservation of previously passing behavior.
 - **Using blockers for ordinary rework:** Correctable defects belong in `kanban_request_changes`; reserve `kanban_block` for genuine external blockers or human decisions.

@@ -235,7 +235,7 @@ curl -s -X POST \
 **With gh:**
 
 ```bash
-gh issue comment 42 --body "Investigated — root cause is in auth middleware. Working on a fix."
+gh issue comment 42 --body "Investigated - root cause is in auth middleware. Working on a fix."
 ```
 
 **With curl:**
@@ -244,7 +244,7 @@ gh issue comment 42 --body "Investigated — root cause is in auth middleware. W
 curl -s -X POST \
   -H "Authorization: token $GITHUB_TOKEN" \
   https://api.github.com/repos/$OWNER/$REPO/issues/42/comments \
-  -d '{"body": "Investigated — root cause is in auth middleware. Working on a fix."}'
+  -d '{"body": "Investigated - root cause is in auth middleware. Working on a fix."}'
 ```
 
 ### Closing and Reopening
@@ -368,3 +368,8 @@ curl -s \
 | Comment | `gh issue comment N --body ...` | `POST /repos/{o}/{r}/issues/N/comments` |
 | Close | `gh issue close N` | `PATCH /repos/{o}/{r}/issues/N` |
 | Search | `gh issue list --search "..."` | `GET /search/issues?q=...` |
+
+
+### **Never use em-dashes anywhere**
+
+Zero exceptions. Use `. `, `; `, `, ` or split into two sentences instead. Replace any occurrence with an alternative. Em-dash do not render properly in many text editors and applications, making source-code/documentation or output hard to read and should be avoided at all costs.

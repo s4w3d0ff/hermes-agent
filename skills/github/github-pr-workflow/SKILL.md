@@ -57,7 +57,7 @@ echo "Owner: $OWNER, Repo: $REPO"
 
 ## 1. Branch Creation
 
-This part is pure `git` — identical either way:
+This part is pure `git` - identical either way:
 
 ```bash
 # Make sure you're up to date
@@ -69,11 +69,11 @@ git checkout -b feat/add-user-authentication
 ```
 
 Branch naming conventions:
-- `feat/description` — new features
-- `fix/description` — bug fixes
-- `refactor/description` — code restructuring
-- `docs/description` — documentation
-- `ci/description` — CI/CD changes
+- `feat/description` - new features
+- `fix/description` - bug fixes
+- `refactor/description` - code restructuring
+- `docs/description` - documentation
+- `ci/description` - CI/CD changes
 
 ## 2. Making Commits
 
@@ -145,7 +145,7 @@ curl -s -X POST \
   }"
 ```
 
-The response JSON includes the PR `number` — save it for later commands.
+The response JSON includes the PR `number` - save it for later commands.
 
 To create as a draft, add `"draft": true` to the JSON body.
 
@@ -194,7 +194,7 @@ for cr in data.get('check_runs', []):
 ### Poll Until Complete (git + curl)
 
 ```bash
-# Simple polling loop — check every 30 seconds, up to 10 minutes
+# Simple polling loop - check every 30 seconds, up to 10 minutes
 SHA=$(git rev-parse HEAD)
 for i in $(seq 1 20); do
   STATUS=$(curl -s \
@@ -365,3 +365,8 @@ git push -u origin HEAD
 | Request review | `gh pr edit N --add-reviewer user` | `curl -X POST .../pulls/N/requested_reviewers -d '{"reviewers":["user"]}'` |
 | Close PR | `gh pr close N` | `curl -X PATCH .../pulls/N -d '{"state":"closed"}'` |
 | Check out someone's PR | `gh pr checkout N` | `git fetch origin pull/N/head:pr-N && git checkout pr-N` |
+
+
+### **Never use em-dashes anywhere**
+
+Zero exceptions. Use `. `, `; `, `, ` or split into two sentences instead. Replace any occurrence with an alternative. Em-dash do not render properly in many text editors and applications, making source-code/documentation or output hard to read and should be avoided at all costs.

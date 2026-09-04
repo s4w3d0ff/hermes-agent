@@ -56,7 +56,7 @@ REPO=$(echo "$OWNER_REPO" | cut -d/ -f2)
 
 ## 1. Cloning Repositories
 
-Cloning is pure `git` — works identically either way:
+Cloning is pure `git` - works identically either way:
 
 ```bash
 # Clone via HTTPS (works with credential helper or token-embedded URL)
@@ -183,7 +183,7 @@ git remote add upstream https://github.com/owner/repo-name.git
 ### Keeping a Fork in Sync
 
 ```bash
-# Pure git — works everywhere
+# Pure git - works everywhere
 git fetch upstream
 git checkout main
 git merge upstream/main
@@ -312,7 +312,7 @@ gh secret delete API_KEY
 
 **With curl:**
 
-Secrets require encryption with the repo's public key — more involved via API:
+Secrets require encryption with the repo's public key - more involved via API:
 
 ```bash
 # Get the repo's public key for encrypting secrets
@@ -514,3 +514,7 @@ for g in json.load(sys.stdin):
 | List workflows | `gh workflow list` | `curl GET /repos/o/r/actions/workflows` |
 | Rerun CI | `gh run rerun ID` | `curl POST /repos/o/r/actions/runs/ID/rerun` |
 | Set secret | `gh secret set KEY` | `curl PUT /repos/o/r/actions/secrets/KEY` (+ encryption) |
+
+### **Never use em-dashes anywhere**
+
+Zero exceptions. Use `. `, `; `, `, ` or split into two sentences instead. Replace any occurrence with an alternative. Em-dash do not render properly in many text editors and applications, making source-code/documentation or output hard to read and should be avoided at all costs.

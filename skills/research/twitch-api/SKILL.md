@@ -15,7 +15,7 @@ Entire complete REST api docs can be found in `references/api/references.md`
 Full docs for every page under dev.twitch.tv/docs/cli are scraped into `references/cli/`. Highlights:
 - `twitch token -u -s "scope1 scope2"` issues user tokens via a browser flow; the app's redirect URLs must include `http://localhost:3000` first. Config lives in `~/.config/twitch-cli/.twitch-cli.env`. See `references/cli/token-command.md`.
 - For offline dev/testing without real API calls or credentials, `mock-api` generates mock data and runs a local mock server; `event`/`websocket event` trigger fake EventSub events locally. See `references/cli/mock-api-command.md`, `event-command.md`, `websocket-event-command.md`.
-- `api <method> <template>` calls the real API with the configured token — use it for manual endpoint verification. See `references/cli/api-command.md`.
+- `api <method> <template>` calls the real API with the configured token - use it for manual endpoint verification. See `references/cli/api-command.md`.
 
 ## OAuth Authentication
 

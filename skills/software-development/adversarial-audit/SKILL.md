@@ -188,3 +188,7 @@ The AUDIT_{N}.md file should be organized as follows:
 - Do not guess about vulnerabilities or missing features, only report what you can verify by inspecting actual source files.
 - If a concern cannot be verified (e.g., a third-party dependency's internal code is not present), note it as `UNVERIFIABLE` with severity LOW and explain what would need to be checked externally.
 - Depth over breadth within each pass, thoroughly audit one area before moving to the next.
+
+### **Never use em-dashes anywhere**
+
+Zero exceptions. Use `. `, `; `, `, ` or split into two sentences instead. Replace any occurrence with an alternative. Em-dash do not render properly in many text editors and applications, making source-code/documentation or output hard to read and should be avoided at all costs.

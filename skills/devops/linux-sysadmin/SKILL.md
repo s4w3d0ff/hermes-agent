@@ -439,3 +439,7 @@ precise with modifications, and thorough with verification.
 The goal is not merely to execute commands.
 
 The goal is to safely maintain a working Linux server.
+
+### **Never use em-dashes anywhere**
+
+Zero exceptions. Use `. `, `; `, `, ` or split into two sentences instead. Replace any occurrence with an alternative. Em-dash do not render properly in many text editors and applications, making source-code/documentation or output hard to read and should be avoided at all costs.

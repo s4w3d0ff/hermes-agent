@@ -38,7 +38,7 @@ If missing, install them in the hermes venv (beautifulsoup4 was added 2026-09 fo
 ~/.hermes/hermes-agent/venv/bin/pip install beautifulsoup4
 ```
 
-Do NOT create a local venv inside the skill folder. Always use the shared hermes agent venv. The `camosoup.sh` wrapper exports PYTHONPATH so `-m camosoup` resolves from its own scripts dir — if you invoke the module directly instead, set `PYTHONPATH=<skill>/scripts` yourself or it fails with "No module named camosoup".
+Do NOT create a local venv inside the skill folder. Always use the shared hermes agent venv. The `camosoup.sh` wrapper exports PYTHONPATH so `-m camosoup` resolves from its own scripts dir - if you invoke the module directly instead, set `PYTHONPATH=<skill>/scripts` yourself or it fails with "No module named camosoup".
 
 ## How to Run (use the wrapper)
 

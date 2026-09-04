@@ -17,7 +17,7 @@ metadata:
 - Establishing clear project goals and verification criteria
 - Creating task-level plans with test cases
 
-##S Project Milestones File- `{projectroot}/.hermes/MILESTONES.md`
+##S Project Milestones File- `{projectroot}/.agents/MILESTONES.md`
 
 A high-level project overview document that:
 
@@ -93,7 +93,7 @@ Include a checklist of verifiable deliverables:
 3. **Sequential**: Ensure milestones build on each other; avoid circular dependencies
 4. **Complete**: Include all major components before moving to optimization
 
-## Project Plans - `{projectroot}/.hermes/{milestone}_PLAN.md`
+## Project Plans - `{projectroot}/.agents/{milestone}_PLAN.md`
 
 A detailed breakdown of a specific milestone that:
 

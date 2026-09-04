@@ -1,6 +1,6 @@
 ---
 name: plan
-description: Write a markdown plan to .hermes/plans/; no execution.
+description: Write a markdown plan to .agents/plans/; no execution.
 version: 2.0.0
 author: Hermes Agent (writing-craft adapted from obra/superpowers)
 license: MIT
@@ -23,7 +23,7 @@ For this turn, you are planning only.
 - Do not edit project files except the plan markdown file.
 - Do not run mutating terminal commands, commit, push, or perform external actions.
 - You may inspect the repo or other context with read-only commands/tools when needed.
-- Your deliverable is a markdown plan saved inside the active workspace under `.hermes/plans/`.
+- Your deliverable is a markdown plan saved inside the active workspace under `.agents/plans/`.
 
 ## Output requirements
 
@@ -43,12 +43,12 @@ If the task is code-related, include exact file paths, likely test targets, and 
 ## Save location
 
 Save the plan with `write_file` under:
-- `.hermes/plans/YYYY-MM-DD_HHMMSS-<slug>.md`
+- `.agents/plans/YYYY-MM-DD_HHMMSS-<slug>.md`
 
 Treat that as relative to the active working directory / backend workspace. Hermes file tools are backend-aware, so using this relative path keeps the plan with the workspace on local, docker, ssh, modal, and daytona backends.
 
 If the runtime provides a specific target path, use that exact path.
-If not, create a sensible timestamped filename yourself under `.hermes/plans/`.
+If not, create a sensible timestamped filename yourself under `.agents/plans/`.
 
 ## Interaction style
 
@@ -61,7 +61,7 @@ If not, create a sensible timestamped filename yourself under `.hermes/plans/`.
 
 # Writing the Plan Well
 
-The rest of this skill is the craft of authoring a *good* implementation plan — the content that goes inside the markdown file above.
+The rest of this skill is the craft of authoring a *good* implementation plan - the content that goes inside the markdown file above.
 
 ## Overview
 
@@ -88,11 +88,11 @@ Assume the implementer is a skilled developer but knows almost nothing about the
 **Each task = 2-5 minutes of focused work.**
 
 Every step is one action:
-- "Write the failing test" — step
-- "Run it to make sure it fails" — step
-- "Implement the minimal code to make the test pass" — step
-- "Run the tests and make sure they pass" — step
-- "Commit" — step
+- "Write the failing test" - step
+- "Run it to make sure it fails" - step
+- "Implement the minimal code to make the test pass" - step
+- "Run the tests and make sure they pass" - step
+- "Commit" - step
 
 **Too big:**
 ```markdown
@@ -157,7 +157,7 @@ def test_specific_behavior():
 **Step 2: Run test to verify failure**
 
 Run: `pytest tests/path/test.py::test_specific_behavior -v`
-Expected: FAIL — "function not defined"
+Expected: FAIL - "function not defined"
 
 **Step 3: Write minimal implementation**
 
@@ -256,7 +256,7 @@ Check:
 **Good:** Implement only what's needed now
 
 ```python
-# Bad — YAGNI violation
+# Bad - YAGNI violation
 class User:
     def __init__(self, name, email):
         self.name = name
@@ -264,7 +264,7 @@ class User:
         self.preferences = {}  # Not needed yet!
         self.metadata = {}     # Not needed yet!
 
-# Good — YAGNI
+# Good - YAGNI
 class User:
     def __init__(self, name, email):
         self.name = name
@@ -315,7 +315,7 @@ git commit -m "type: description"
 
 After saving the plan, offer the execution approach:
 
-**"Plan complete and saved. Ready to execute using subagent-driven-development — I'll dispatch a fresh subagent per task with two-stage review (spec compliance then code quality). Shall I proceed?"**
+**"Plan complete and saved. Ready to execute using subagent-driven-development - I'll dispatch a fresh subagent per task with two-stage review (spec compliance then code quality). Shall I proceed?"**
 
 When executing, use the `subagent-driven-development` skill:
 - Fresh `delegate_task` per task with full context
@@ -336,3 +336,7 @@ Frequent commits
 ```
 
 **A good plan makes implementation obvious.**
+
+### **Never use em-dashes anywhere**
+
+Zero exceptions. Use `. `, `; `, `, ` or split into two sentences instead. Replace any occurrence with an alternative. Em-dash do not render properly in many text editors and applications, making source-code/documentation or output hard to read and should be avoided at all costs.

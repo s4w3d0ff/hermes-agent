@@ -116,7 +116,7 @@ When creating tasks whose workers produce output that downstream tasks need (e.g
 
 **Two paths to know:**
 
-- **Scratch workspace**: `~/.hermes/kanban/workspaces/{task_id}/` - wiped on task completion. Workers use this by default. Good for temporary files during execution.
+- **Scratch workspace**: `~/.agents/kanban/workspaces/{task_id}/` - wiped on task completion. Workers use this by default. Good for temporary files during execution.
 - **Project workspace**: `~/Projects/{project_name}/` - persistent across tasks and sessions. This is where final deliverables go.
 
 Example: if task A produces a spec that task B consumes, add to task A's body:
@@ -166,7 +166,7 @@ hermes kanban boards switch <board>             # switch boards
 hermes kanban reassign <id>... <profile>        # bulk re-assign tasks to a profile
 hermes kanban schedule <id> --at <ISO8601>      # set/clear a task's scheduled_at start time
 hermes kanban unlink <parent_id> <child_id>     # remove link
-hermes kanban log <id> [--tail BYTES]           # worker log from ~/.hermes/kanban/logs/
+hermes kanban log <id> [--tail BYTES]           # worker log from ~/.agents/kanban/logs/
 hermes kanban archive <id>...                   # bulk archive/remove task
 ```
 
