@@ -93,7 +93,7 @@ Browse web via camofox-browser (`camofox-browser` terminal cmd).
 - If a venv is present, use it
 ### Base Project template:
 ```
-~\.agents\<projectname>\
+~\Projects\<projectname>\
 ├── .git\
 ├── .gitignore
 ├── README.md
