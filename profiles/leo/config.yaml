@@ -2,7 +2,7 @@ model:
   default: qwen3.8-27b
   provider: lmstudio
   base_url: http://192.168.1.232:1234/v1
-  context_length: 142000
+  context_length: 150000
 toolsets:
   - hermes-cli
   - project
@@ -18,13 +18,13 @@ agent:
   clarify_timeout: 4200
   tool_use_enforcement: true
   disabled_toolsets:
-    # - web
-    # - browser
+    - web
+    - browser
     # - vision
     # - code_execution
     # - session_search
     # - clarify
-    # - cronjob
+    - cronjob
     - discord
     - discord_admin
     - kanban
@@ -58,8 +58,6 @@ skills:
   creation_nudge_interval: 15
 context:
   engine: compressor
-context_file_max_chars: 50000
-file_read_max_chars: 200000
 memory:
   memory_enabled: true
   user_profile_enabled: true
@@ -69,10 +67,10 @@ memory:
   flush_min_turns: 6
 compression:
   enabled: true
-  threshold: 0.85
-  target_ratio: 0.36
-  protect_last_n: 25
-  protect_first_n: 10
+  threshold: 0.50
+  target_ratio: 0.25
+  protect_last_n: 14
+  protect_first_n: 7
 display:
   compact: false
   busy_input_mode: steer
