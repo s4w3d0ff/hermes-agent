@@ -1,7 +1,7 @@
 model:
-  default: hauhaucs/qwen3.8-27b-uncensored-hauhaucs-aggressive-mtp-gguf/qwen3.8-27b-uncensored-hauhaucs-aggressive-q3_k_p.gguf
-  provider: lmstudio
-  base_url: http://192.168.8.173:1234/v1
+  default: qwen38
+  provider: custom
+  base_url: http://192.168.8.164:8080/v1
   context_length: 200000
 toolsets:
   - hermes-cli
@@ -166,88 +166,3 @@ session_reset:
 group_sessions_per_user: true
 approvals:
   destructive_slash_confirm: false
-  deny:
-    - hermes *chat*
-    - hermes profile use*
-    - hermes *desktop*
-    - hermes *dashboard*
-    - hermes *uninstall
-    - hermes *pets*
-    - hermes *tools*
-    - hermes *pairing*
-    - hermes *acp*
-    - hermes *mcp*
-    - hermes *curator*
-    - hermes *portal*
-    - hermes *config*
-    - hermes *doctor*
-    - hermes *migrate*
-    - hermes *secrets*
-    - hermes *send*
-    - hermes *gateway*
-    - hermes *setup*
-    - git push --force*
-    - git push -*f*
-    - git push * --force*
-    - git push --delete *
-    - git push * :*
-    - git add *--force*
-    - git add --force*
-    - git add -*f*
-    - git config *user*
-    - git config set*
-    - git config unset*
-    - git config edit*
-    - git config rename-section*
-    - git config remove-section*
-    - git reset --hard*
-    - git clean -fd*
-    - git clean -xdf*
-    - git checkout -- *
-    - git restore *
-    - rm * /etc/ssh/*
-    - rm -rf * /etc/ssh/*
-    - systemctl disable ssh*
-    - systemctl mask ssh*
-    - ufw deny * 22*
-    - ufw delete * 22*
-    - rm * /etc/passwd
-    - rm * /etc/shadow
-    - rm * /etc/group
-    - rm * /etc/gshadow
-    - rm * /etc/sudoers
-    - rm -rf * /etc/sudoers.d/*
-    - rm * /etc/sudoers.d/*
-    - userdel *
-    - groupdel *
-    - gpasswd -d * sudo
-    - gpasswd -d * adm
-    - ufw disable
-    - ufw reset
-    - iptables -F*
-    - iptables --flush*
-    - nft flush ruleset
-    - shutdown *
-    - poweroff *
-    - halt *
-    - reboot *
-    - systemctl poweroff*
-    - systemctl reboot*
-    - systemctl halt*
-    - docker system prune --volumes*
-    - docker volume prune*
-    - docker volume rm *
-    - podman system reset*
-    - '*curl*|*python*'
-    - '*curl*|*perl*'
-    - '*curl*|*ruby*'
-    - '*wget*|*python*'
-    - '*wget*|*perl*'
-    - '*wget*|*ruby*'
-    - rm * /boot/*
-    - rm -rf * /boot/*
-    - grub-install *
-    - efibootmgr *
-    - setenforce 0
-    - aa-disable *
-    - apparmor_parser -R *
