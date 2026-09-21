@@ -23,6 +23,28 @@ Key paths:
 NOTE: source lives at /models/modelctl (moved from /opt/modelctl in Sep 2026;
 the old tree was deleted). All systemd units point at the new path.
 
+## Git repo (versioned since Sep 2026)
+
+Code is versioned at `github.com/s4w3d0ff/modelctl` (PRIVATE). Local git repo
+lives in `/models/modelctl`, branch `main`. Push works over SSH: the box's
+`~/.ssh/id_ed25519` is registered as a repo deploy key (no token on the box).
+
+What is NOT versioned (gitignored): live `registry.json` (calibrated sizes +
+box-local paths), all `venv*/`, `*.bak*`, `__pycache__/`, and the whole
+`comfyui/` upstream checkout (it has its own `.git`). The sanitized template
+is `registry.example.json`. Only our node pack file inside comfyui is tracked:
+`comfyui/custom_nodes/ComfyUI-modelctl/__init__.py`.
+
+LAN scoping for generated units reads registry top-level keys `lan_subnet`
+and `lan_iface` (set on this box to 192.168.8.0/24 / enp4s0); if unset, no
+ufw scoping is emitted. Configs reference the generic binary path
+`/usr/local/bin/llama-server`, which is a symlink to
+/opt/llama.cpp/build/bin/llama-server.
+
+Pitfall: `git add -f <file>` SILENTLY stages nothing when an ancestor dir is
+fully gitignored (rc=0, no error). Stage such files with
+`git update-index --add --cacheinfo 100644,$(git hash-object -w <f>),<path>`.
+
 ## SELF-REFERENCE GATE (read first, every time)
 
 This agent runs OFF the gateway. The LLM it runs on is a loaded registry model.
