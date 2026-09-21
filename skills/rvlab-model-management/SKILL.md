@@ -25,12 +25,21 @@ the old tree was deleted). All systemd units point at the new path.
 
 ## Git repo (prepped Sep 2026, NOT yet pushed)
 
-Local git repo in `/models/modelctl`, branch `feat/reproducible-config` (5
-atomic commits), NO remote attached. The code is config-driven and box-
-agnostic: paths resolve from mc_paths (MODELCTL_HOME/MODELS_ROOT + ${...}
-tokens) and per-box settings from mc_deploy (env vars or gitignored
-deploy.json). LAN scoping reads deploy.json `lan_iface`/`lan_subnet`
+Local git repo in `/models/modelctl`, branch `feat/reproducible-config`
+(13 atomic commits), NO remote attached, working tree clean. The code is
+config-driven and box-agnostic: paths resolve from mc_paths (MODELCTL_HOME/
+MODELS_ROOT + ${...} tokens) and per-box settings from mc_deploy (env vars or
+gitignored deploy.json). LAN scoping reads deploy.json `lan_iface`/`lan_subnet`
 (this box: enp4s0 / 192.168.8.0/24); unset means no ufw rules.
+
+Architecture (post-refactor, verified live): the registry is read in exactly
+one place, mc_registry.load_registry(path, strict) (token-expanding; non-strict
+degrades to empty fleet for servers), shared by modelctl.py, srv_gateway.py,
+srv_dashboard.py and the ComfyUI node pack. The service user for generated
+units comes ONLY from mc_deploy.user() (env MODELCTL_USER > deploy.json >
+$SUDO_USER); per-model `user` in the registry is NOT read anymore.
+registry.example.json is regenerated from the live fleet, fully tokenized,
+no user/workdir/lan keys; install.sh seeding it boots on a clean box.
 
 A PRIVATE remote `github.com/s4w3d0ff/modelctl` exists but still holds a BAD
 premature `main` commit (pre-refactor, absolute paths). Before any real push:
@@ -78,9 +87,11 @@ and/or `cat ~/.hermes/config.yaml` (base_url points at the :8080 gateway).
    `cp /models/modelctl/registry.json /models/modelctl/registry.json.bak-$(date +%Y%m%d)`
 4. Add the registry entry. Edit with Python json (not sed) so you do not break
    structure or ownership. Required fields: kind, description, path,
-   command=[binary] (FALLBACK ONLY, see pitfall), workdir, user, port,
-   health_url, vram_mib (estimate; auto-calibrated on first real load),
-   ram_gib, load_seconds, limits{memory_high,cpu_quota}, enabled:true.
+   command=[binary] (FALLBACK ONLY, see pitfall), port, health_url, vram_mib
+   (estimate; auto-calibrated on first real load), ram_gib, load_seconds,
+   limits{memory_high,cpu_quota}, enabled:true. Optional: workdir, env{},
+   action_path, api_style, no_calibrate. Do NOT set a per-model `user` field;
+   the service user comes from deploy.json / MODELCTL_USER (mc_deploy.user()).
 5. CREATE /models/modelctl/configs/<id>.yaml. This is what ACTUALLY launches a
    llama-server model. Copy an existing config field-for-field (e.g. qwen38.yaml)
    and change model_path, port, sampling, and spec flags. See
@@ -125,6 +136,12 @@ and/or `cat ~/.hermes/config.yaml` (base_url points at the :8080 gateway).
 - **Preserve registry.json ownership.** modelctl's save_registry chowns the
   file back to the original owner, but if you edit it as root outside
   modelctl, chown it back to the user or it becomes unwritable later.
+- **Never put box-specific values in committed files.** The repo is prepped to
+  be pushed private; every blob in history is scanned for s4w3d0ff / rvlab /
+  192.168.* / enp4s0 before committing. registry.example.json must stay fully
+  tokenized with no user/workdir/lan keys (those live in gitignored
+deploy.json). If you regenerate it from the live registry, strip dead top-level
+  lan_iface/lan_subnet keys first.
 
 ## Quick dry-run (no GPU change)
 
