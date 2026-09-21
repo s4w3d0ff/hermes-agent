@@ -23,23 +23,25 @@ Key paths:
 NOTE: source lives at /models/modelctl (moved from /opt/modelctl in Sep 2026;
 the old tree was deleted). All systemd units point at the new path.
 
-## Git repo (versioned since Sep 2026)
+## Git repo (prepped Sep 2026, NOT yet pushed)
 
-Code is versioned at `github.com/s4w3d0ff/modelctl` (PRIVATE). Local git repo
-lives in `/models/modelctl`, branch `main`. Push works over SSH: the box's
-`~/.ssh/id_ed25519` is registered as a repo deploy key (no token on the box).
+Local git repo in `/models/modelctl`, branch `feat/reproducible-config` (5
+atomic commits), NO remote attached. The code is config-driven and box-
+agnostic: paths resolve from mc_paths (MODELCTL_HOME/MODELS_ROOT + ${...}
+tokens) and per-box settings from mc_deploy (env vars or gitignored
+deploy.json). LAN scoping reads deploy.json `lan_iface`/`lan_subnet`
+(this box: enp4s0 / 192.168.8.0/24); unset means no ufw rules.
 
-What is NOT versioned (gitignored): live `registry.json` (calibrated sizes +
-box-local paths), all `venv*/`, `*.bak*`, `__pycache__/`, and the whole
-`comfyui/` upstream checkout (it has its own `.git`). The sanitized template
-is `registry.example.json`. Only our node pack file inside comfyui is tracked:
+A PRIVATE remote `github.com/s4w3d0ff/modelctl` exists but still holds a BAD
+premature `main` commit (pre-refactor, absolute paths). Before any real push:
+drop that branch on GitHub (`gh api -X DELETE repos/s4w3d0ff/modelctl/branches/main`) and set default branch to the feature branch. Push over SSH: box's
+`~/.ssh/id_ed25519` is a repo deploy key (no token on box).
+
+Gitignored (never versioned): live `registry.json`, `deploy.json`, all
+`venv*/`, `*.bak*`, `__pycache__/`, and the whole `comfyui/` upstream checkout
+(own `.git`). Committed templates: `registry.example.json` (tokenized),
+`configs/*.yaml`. Only our node pack file inside comfyui is tracked:
 `comfyui/custom_nodes/ComfyUI-modelctl/__init__.py`.
-
-LAN scoping for generated units reads registry top-level keys `lan_subnet`
-and `lan_iface` (set on this box to 192.168.8.0/24 / enp4s0); if unset, no
-ufw scoping is emitted. Configs reference the generic binary path
-`/usr/local/bin/llama-server`, which is a symlink to
-/opt/llama.cpp/build/bin/llama-server.
 
 Pitfall: `git add -f <file>` SILENTLY stages nothing when an ancestor dir is
 fully gitignored (rc=0, no error). Stage such files with
