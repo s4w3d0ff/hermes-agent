@@ -26,21 +26,24 @@ the old tree was deleted). All systemd units point at the new path.
 ## Git repo (prepped Sep 2026, NOT yet pushed)
 
 Local git repo in `/models/modelctl`, branch `feat/reproducible-config`
-(13 atomic commits), NO remote attached, working tree clean. The code is
+(20 atomic commits), NO remote attached, working tree clean. The code is
 config-driven and box-agnostic: paths resolve from mc_paths (MODELCTL_HOME/
 MODELS_ROOT + ${...} tokens) and per-box settings from mc_deploy (env vars or
-gitignored deploy.json). LAN scoping reads deploy.json `lan_iface`/`lan_subnet`
-(this box: enp4s0 / 192.168.8.0/24); unset means no ufw rules.
+gitignored deploy.json). No LAN scoping exists anymore.
 
-Architecture (post-refactor, verified live): the registry is read in exactly
-one place, mc_registry.load_registry(path, strict) (token-expanding; non-strict
-degrades to empty fleet for servers), shared by modelctl.py, srv_gateway.py,
-srv_dashboard.py and the ComfyUI node pack. The service user has NO setting at
-all: mc_deploy.user() is just $SUDO_USER > $USER (no MODELCTL_USER env var, no
-deploy.json "user" key, no per-model field). Control-plane units are installed
-under the invoking account so their `sudo -n modelctl` auto-loads resolve the
-same user. registry.example.json is regenerated from the live fleet, fully
-tokenized, no user/workdir/lan keys; install.sh seeding it boots on a clean box.
+Architecture (portable refactor, verified live): the registry is read in exactly
+one place, mc_registry.load_registry(path, strict), shared by modelctl.py,
+srv_gateway.py, srv_dashboard.py and the ComfyUI node pack. Models bind 127.0.0.1
+ONLY; the gateway (port 8080) is the single LAN-facing service and also serves
+the dashboard at /dashboard (mc-dashboard.service no longer exists). The
+gateway unit runs as root so its modelctl auto-loads need no privilege config
+anywhere in the stack. Generated model units run as mc_deploy.user():
+MODELCTL_USER env > deploy.json "user" > first login account (uid>=1000) > root;
+zero-config on a fresh single-user box. No firewall rules are generated at all.
+install.sh is idempotent, touches only venvs + the modelctl symlink + one unit
+file, auto-detects GPU CUDA arch for the llama.cpp build; MODELS.md maps every
+registry entry to its upstream weight source. Read-only modelctl commands work
+non-root; load/unload/switch require root.
 
 A PRIVATE remote `github.com/s4w3d0ff/modelctl` exists but still holds a BAD
 premature `main` commit (pre-refactor, absolute paths). Before any real push:
@@ -91,8 +94,8 @@ and/or `cat ~/.hermes/config.yaml` (base_url points at the :8080 gateway).
    command=[binary] (FALLBACK ONLY, see pitfall), port, health_url, vram_mib
    (estimate; auto-calibrated on first real load), ram_gib, load_seconds,
    limits{memory_high,cpu_quota}, enabled:true. Optional: workdir, env{},
-   action_path, api_style, no_calibrate. Do NOT set a per-model `user` field;
-   units run as the invoking account ($SUDO_USER > $USER), there is no knob.
+   action_path, api_style, no_calibrate. Do NOT set a per-model `user`
+   field; units run as mc_deploy.user() (first login user by default).
 5. CREATE /models/modelctl/configs/<id>.yaml. This is what ACTUALLY launches a
    llama-server model. Copy an existing config field-for-field (e.g. qwen38.yaml)
    and change model_path, port, sampling, and spec flags. See
