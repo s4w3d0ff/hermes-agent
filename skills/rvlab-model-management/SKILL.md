@@ -35,11 +35,12 @@ gitignored deploy.json). LAN scoping reads deploy.json `lan_iface`/`lan_subnet`
 Architecture (post-refactor, verified live): the registry is read in exactly
 one place, mc_registry.load_registry(path, strict) (token-expanding; non-strict
 degrades to empty fleet for servers), shared by modelctl.py, srv_gateway.py,
-srv_dashboard.py and the ComfyUI node pack. The service user for generated
-units comes ONLY from mc_deploy.user() (env MODELCTL_USER > deploy.json >
-$SUDO_USER); per-model `user` in the registry is NOT read anymore.
-registry.example.json is regenerated from the live fleet, fully tokenized,
-no user/workdir/lan keys; install.sh seeding it boots on a clean box.
+srv_dashboard.py and the ComfyUI node pack. The service user has NO setting at
+all: mc_deploy.user() is just $SUDO_USER > $USER (no MODELCTL_USER env var, no
+deploy.json "user" key, no per-model field). Control-plane units are installed
+under the invoking account so their `sudo -n modelctl` auto-loads resolve the
+same user. registry.example.json is regenerated from the live fleet, fully
+tokenized, no user/workdir/lan keys; install.sh seeding it boots on a clean box.
 
 A PRIVATE remote `github.com/s4w3d0ff/modelctl` exists but still holds a BAD
 premature `main` commit (pre-refactor, absolute paths). Before any real push:
@@ -91,7 +92,7 @@ and/or `cat ~/.hermes/config.yaml` (base_url points at the :8080 gateway).
    (estimate; auto-calibrated on first real load), ram_gib, load_seconds,
    limits{memory_high,cpu_quota}, enabled:true. Optional: workdir, env{},
    action_path, api_style, no_calibrate. Do NOT set a per-model `user` field;
-   the service user comes from deploy.json / MODELCTL_USER (mc_deploy.user()).
+   units run as the invoking account ($SUDO_USER > $USER), there is no knob.
 5. CREATE /models/modelctl/configs/<id>.yaml. This is what ACTUALLY launches a
    llama-server model. Copy an existing config field-for-field (e.g. qwen38.yaml)
    and change model_path, port, sampling, and spec flags. See
