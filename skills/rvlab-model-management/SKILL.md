@@ -26,10 +26,31 @@ the old tree was deleted). All systemd units point at the new path.
 ## Git repo (prepped Sep 2026, NOT yet pushed)
 
 Local git repo in `/models/modelctl` (origin = github.com:s4w3d0ff/modelctl,
-deploy key at ~/.ssh/id_ed25519). Working branch `feat/reproducible-config`
-(20 atomic commits), working tree clean. REMOTE STATE: default branch is
-`master`, and both `master` + `feat/reproducible-config` point at the same clean
-tip (5433507); the stale pre-refactor `main` was deleted. The code is
+deploy key at ~/.ssh/id_ed25519). REMOTE STATE: default branch is `master`
+(= 5433507); stale pre-refactor `main` deleted. LOCAL WORK (Sep 2026, unpushed):
+branch `feat/reproducible-config` = pushed tip; on top of it, local-only branch
+`feat/repo-cleanup` holds the repo cleanup (5 commits): python reorganized into a
+package, dead servers/venvs/comfyui removed, docs rewritten. Working tree clean.
+
+REPO LAYOUT (post-cleanup): `modelctl.py` at root; package under `mc/`. NO mc_/srv_
+prefixes on modules (folder already says what it is):
+  mc/core/{paths,registry,deploy,config}.py   shared library
+  mc/servers/{gateway,dashboard,yolo26,whisper,pp_doclayout,tts_omnivoice}.py
+  mc/tools/verify_models.py                   fleet verifier
+Every entry point bootstraps sys.path to MODELCTL_HOME from its depth; imports use
+dotted paths (from mc.core import config / from mc.core.paths import ...). Registry
+command[] for python models points at ${MODELCTL_HOME}/mc/servers/<file>.py. EXCEPTION:
+the omnivoice server is tts_omnivoice.py NOT omnivoice.py, because it does
+"from omnivoice import OmniVoice" (k2-fsa pip pkg) and a file named omnivoice.py would
+self-shadow the library import and crash at startup. The comfyui/ checkout + node pack
+are GONE (removed with the image/audio servers).
+
+VENV POLICY: one shared venv by default; separate venv only on real dependency
+conflict. Fleet now has exactly TWO: `venv` (base.txt: gateway, dashboard,
+yolo26, whisper, omnivoice) and `venv-paddle` (paddle.txt: pp-doclayout, because
+PaddlePaddle's CUDA runtime conflicts with PyTorch). The old venv-acestep/-nemo/
+-uocr/-comfy were deleted (~36 GB freed; 53G -> 17G total). install.sh VENV_REQ map
+now lists only [venv]=base.txt and [venv-paddle]=paddle.txt. The code is
 config-driven and box-agnostic: paths resolve from mc_paths (MODELCTL_HOME/
 MODELS_ROOT + ${...} tokens) and per-box settings from mc_deploy (env vars or
 gitignored deploy.json). No LAN scoping exists anymore.
