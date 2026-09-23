@@ -294,7 +294,7 @@ gh issue develop 42 --checkout
 **With git (manual equivalent):**
 
 ```bash
-git checkout main && git pull origin main
+git checkout master && git pull origin master
 git checkout -b fix/issue-42-login-redirect
 ```
 

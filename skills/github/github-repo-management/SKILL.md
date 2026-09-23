@@ -126,7 +126,7 @@ git init
 git add .
 git commit -m "Initial commit"
 git remote add origin https://github.com/$GH_USER/my-new-project.git
-git push -u origin main
+git push -u origin master
 ```
 
 To create under an organization:
@@ -185,9 +185,9 @@ git remote add upstream https://github.com/owner/repo-name.git
 ```bash
 # Pure git - works everywhere
 git fetch upstream
-git checkout main
-git merge upstream/main
-git push origin main
+git checkout master
+git merge upstream/master
+git push origin master
 ```
 
 **With gh (shortcut):**
@@ -248,7 +248,7 @@ for r in json.load(sys.stdin)['items']:
 ```bash
 gh repo edit --description "Updated description" --visibility public
 gh repo edit --enable-wiki=false --enable-issues=true
-gh repo edit --default-branch main
+gh repo edit --default-branch master
 gh repo edit --add-topic "machine-learning,python"
 gh repo edit --enable-auto-merge
 ```
@@ -280,12 +280,12 @@ curl -s -X PUT \
 # View current protection
 curl -s \
   -H "Authorization: token $GITHUB_TOKEN" \
-  https://api.github.com/repos/$OWNER/$REPO/branches/main/protection
+  https://api.github.com/repos/$OWNER/$REPO/branches/master/protection
 
 # Set up branch protection
 curl -s -X PUT \
   -H "Authorization: token $GITHUB_TOKEN" \
-  https://api.github.com/repos/$OWNER/$REPO/branches/main/protection \
+  https://api.github.com/repos/$OWNER/$REPO/branches/master/protection \
   -d '{
     "required_status_checks": {
       "strict": true,
@@ -415,7 +415,7 @@ gh run view <RUN_ID>
 gh run view <RUN_ID> --log-failed
 gh run rerun <RUN_ID>
 gh run rerun <RUN_ID> --failed
-gh workflow run ci.yml --ref main
+gh workflow run ci.yml --ref master
 gh workflow run deploy.yml -f environment=staging
 ```
 
@@ -463,7 +463,7 @@ WORKFLOW_ID=<workflow_id_or_filename>
 curl -s -X POST \
   -H "Authorization: token $GITHUB_TOKEN" \
   https://api.github.com/repos/$OWNER/$REPO/actions/workflows/$WORKFLOW_ID/dispatches \
-  -d '{"ref": "main", "inputs": {"environment": "staging"}}'
+  -d '{"ref": "master", "inputs": {"environment": "staging"}}'
 ```
 
 ## 10. Gists

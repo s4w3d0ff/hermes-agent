@@ -158,7 +158,7 @@ terminal(command="opencode pr 42", workdir="~/project", pty=true)
 Or review in a temporary clone for isolation:
 
 ```
-terminal(command="REVIEW=$(mktemp -d) && git clone https://github.com/user/repo.git $REVIEW && cd $REVIEW && opencode run 'Review this PR vs main. Report bugs, security risks, test gaps, and style issues.' -f $(git diff origin/main --name-only | head -20 | tr '\n' ' ')", pty=true)
+terminal(command="REVIEW=$(mktemp -d) && git clone https://github.com/user/repo.git $REVIEW && cd $REVIEW && opencode run 'Review this PR vs master. Report bugs, security risks, test gaps, and style issues.' -f $(git diff origin/master --name-only | head -20 | tr '\n' ' ')", pty=true)
 ```
 
 ## Parallel Work Pattern

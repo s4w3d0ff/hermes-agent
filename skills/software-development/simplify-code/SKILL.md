@@ -65,7 +65,7 @@ git diff HEAD
 # 3. Scoped variants the user may request:
 git diff --staged                 # "staged changes"
 git diff HEAD~1                    # "the last commit"
-git diff main...HEAD              # "this branch" / "my PR"
+git diff master...HEAD              # "this branch" / "my PR"
 git diff -- src/foo.py            # specific file(s)
 ```
 

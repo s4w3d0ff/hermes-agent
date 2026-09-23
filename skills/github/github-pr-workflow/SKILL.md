@@ -62,7 +62,7 @@ This part is pure `git` - identical either way:
 ```bash
 # Make sure you're up to date
 git fetch origin
-git checkout main && git pull origin main
+git checkout master && git pull origin master
 
 # Create and switch to a new branch
 git checkout -b feat/add-user-authentication
@@ -141,7 +141,7 @@ curl -s -X POST \
     \"title\": \"feat: add JWT-based user authentication\",
     \"body\": \"## Summary\nAdds login and register API endpoints.\n\nCloses #42\",
     \"head\": \"$BRANCH\",
-    \"base\": \"main\"
+    \"base\": \"master\"
   }"
 ```
 
@@ -304,8 +304,8 @@ curl -s -X PUT \
 BRANCH=$(git branch --show-current)
 git push origin --delete $BRANCH
 
-# Switch back to main locally
-git checkout main && git pull origin main
+# Switch back to master locally
+git checkout master && git pull origin master
 git branch -d $BRANCH
 ```
 
@@ -330,8 +330,8 @@ curl -s -X POST \
 ## 7. Complete Workflow Example
 
 ```bash
-# 1. Start from clean main
-git checkout main && git pull origin main
+# 1. Start from clean master
+git checkout master && git pull origin master
 
 # 2. Branch
 git checkout -b fix/login-redirect-bug
@@ -360,7 +360,7 @@ git push -u origin HEAD
 | Action | gh | git + curl |
 |--------|-----|-----------|
 | List my PRs | `gh pr list --author @me` | `curl -s -H "Authorization: token $GITHUB_TOKEN" "https://api.github.com/repos/$OWNER/$REPO/pulls?state=open"` |
-| View PR diff | `gh pr diff` | `git diff main...HEAD` (local) or `curl -H "Accept: application/vnd.github.diff" ...` |
+| View PR diff | `gh pr diff` | `git diff master...HEAD` (local) or `curl -H "Accept: application/vnd.github.diff" ...` |
 | Add comment | `gh pr comment N --body "..."` | `curl -X POST .../issues/N/comments -d '{"body":"..."}'` |
 | Request review | `gh pr edit N --add-reviewer user` | `curl -X POST .../pulls/N/requested_reviewers -d '{"reviewers":["user"]}'` |
 | Close PR | `gh pr close N` | `curl -X PATCH .../pulls/N -d '{"state":"closed"}'` |

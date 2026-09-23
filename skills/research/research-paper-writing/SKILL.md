@@ -128,7 +128,7 @@ workspace/
 ```bash
 git init  # if not already
 git remote add origin <repo-url>
-git checkout -b paper-draft  # or main
+git checkout -b paper-draft  # or master
 ```
 
 **Git discipline**: Every completed experiment batch gets committed with a descriptive message. Example:

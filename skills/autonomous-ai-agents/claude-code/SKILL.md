@@ -470,7 +470,7 @@ Use the keyword "ultrathink" in your prompt for maximum reasoning effort on a sp
 
 ### Quick Review (Print Mode)
 ```
-terminal(command="cd /path/to/repo && git diff main...feature-branch | claude -p 'Review this diff for bugs, security issues, and style problems. Be thorough.' --max-turns 1", timeout=60)
+terminal(command="cd /path/to/repo && git diff master...feature-branch | claude -p 'Review this diff for bugs, security issues, and style problems. Be thorough.' --max-turns 1", timeout=60)
 ```
 
 ### Deep Review (Interactive + Worktree)
@@ -478,7 +478,7 @@ terminal(command="cd /path/to/repo && git diff main...feature-branch | claude -p
 terminal(command="tmux new-session -d -s review -x 140 -y 40")
 terminal(command="tmux send-keys -t review 'cd /path/to/repo && claude -w pr-review' Enter")
 terminal(command="sleep 5 && tmux send-keys -t review Enter")  # Trust dialog
-terminal(command="sleep 2 && tmux send-keys -t review 'Review all changes vs main. Check for bugs, security issues, race conditions, and missing tests.' Enter")
+terminal(command="sleep 2 && tmux send-keys -t review 'Review all changes vs master. Check for bugs, security issues, race conditions, and missing tests.' Enter")
 terminal(command="sleep 30 && tmux capture-pane -t review -p -S -60")
 ```
 

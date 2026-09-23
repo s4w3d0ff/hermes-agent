@@ -54,14 +54,14 @@ This is pure `git` - works everywhere, no API needed.
 # Staged changes (what would be committed)
 git diff --staged
 
-# All changes vs main (what a PR would contain)
-git diff main...HEAD
+# All changes vs master (what a PR would contain)
+git diff master...HEAD
 
 # File names only
-git diff main...HEAD --name-only
+git diff master...HEAD --name-only
 
 # Stat summary (insertions/deletions per file)
-git diff main...HEAD --stat
+git diff master...HEAD --stat
 ```
 
 ### Review Strategy
@@ -69,30 +69,30 @@ git diff main...HEAD --stat
 1. **Get the big picture first:**
 
 ```bash
-git diff main...HEAD --stat
-git log main..HEAD --oneline
+git diff master...HEAD --stat
+git log master..HEAD --oneline
 ```
 
 2. **Review file by file** - use `read_file` on changed files for full context, and the diff to see what changed:
 
 ```bash
-git diff main...HEAD -- src/auth/login.py
+git diff master...HEAD -- src/auth/login.py
 ```
 
 3. **Check for common issues:**
 
 ```bash
 # Debug statements, TODOs, console.logs left behind
-git diff main...HEAD | grep -n "print(\|console\.log\|TODO\|FIXME\|HACK\|XXX\|debugger"
+git diff master...HEAD | grep -n "print(\|console\.log\|TODO\|FIXME\|HACK\|XXX\|debugger"
 
 # Large files accidentally staged
-git diff main...HEAD --stat | sort -t'|' -k2 -rn | head -10
+git diff master...HEAD --stat | sort -t'|' -k2 -rn | head -10
 
 # Secrets or credential patterns
-git diff main...HEAD | grep -in "password\|secret\|api_key\|token.*=\|private_key"
+git diff master...HEAD | grep -in "password\|secret\|api_key\|token.*=\|private_key"
 
 # Merge conflict markers
-git diff main...HEAD | grep -n "<<<<<<\|>>>>>>\|======="
+git diff master...HEAD | grep -n "<<<<<<\|>>>>>>\|======="
 ```
 
 4. **Present structured feedback** to the user.
@@ -175,7 +175,7 @@ git checkout pr-123
 # Now you can use read_file, search_files, run tests, etc.
 
 # View diff against the base branch
-git diff main...pr-123
+git diff master...pr-123
 ```
 
 **With gh (shortcut):**
@@ -319,8 +319,8 @@ When performing a code review (local or PR), systematically check:
 
 When the user asks you to "review the code" or "check before pushing":
 
-1. `git diff main...HEAD --stat` - see scope of changes
-2. `git diff main...HEAD` - read the full diff
+1. `git diff master...HEAD --stat` - see scope of changes
+2. `git diff master...HEAD` - read the full diff
 3. For each changed file, use `read_file` if you need more context
 4. Apply the checklist above
 5. Present findings in the structured format (Critical / Warnings / Suggestions / Looks Good)
@@ -376,12 +376,12 @@ git checkout pr-$PR_NUMBER
 
 ```bash
 # Full diff against the base branch
-git diff main...HEAD
+git diff master...HEAD
 
 # Or file-by-file for large PRs
-git diff main...HEAD --name-only
+git diff master...HEAD --name-only
 # Then for each file:
-git diff main...HEAD -- path/to/file.py
+git diff master...HEAD -- path/to/file.py
 ```
 
 For each changed file, use `read_file` to see full context around the changes - diffs alone can miss issues visible only with surrounding code.
@@ -470,7 +470,7 @@ EOF
 ### Step 9: Clean up
 
 ```bash
-git checkout main
+git checkout master
 git branch -D pr-$PR_NUMBER
 ```
 

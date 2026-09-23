@@ -25,8 +25,11 @@ the old tree was deleted). All systemd units point at the new path.
 
 ## Git repo (prepped Sep 2026, NOT yet pushed)
 
-Local git repo in `/models/modelctl`, branch `feat/reproducible-config`
-(20 atomic commits), NO remote attached, working tree clean. The code is
+Local git repo in `/models/modelctl` (origin = github.com:s4w3d0ff/modelctl,
+deploy key at ~/.ssh/id_ed25519). Working branch `feat/reproducible-config`
+(20 atomic commits), working tree clean. REMOTE STATE: default branch is
+`master`, and both `master` + `feat/reproducible-config` point at the same clean
+tip (5433507); the stale pre-refactor `main` was deleted. The code is
 config-driven and box-agnostic: paths resolve from mc_paths (MODELCTL_HOME/
 MODELS_ROOT + ${...} tokens) and per-box settings from mc_deploy (env vars or
 gitignored deploy.json). No LAN scoping exists anymore.
@@ -45,10 +48,11 @@ file, auto-detects GPU CUDA arch for the llama.cpp build; MODELS.md maps every
 registry entry to its upstream weight source. Read-only modelctl commands work
 non-root; load/unload/switch require root.
 
-A PRIVATE remote `github.com/s4w3d0ff/modelctl` exists but still holds a BAD
-premature `main` commit (pre-refactor, absolute paths). Before any real push:
-drop that branch on GitHub (`gh api -X DELETE repos/s4w3d0ff/modelctl/branches/main`) and set default branch to the feature branch. Push over SSH: box's
-`~/.ssh/id_ed25519` is a repo deploy key (no token on box).
+Pushing: from rvlab use `GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new" git push origin <branch>` (deploy key, no token on box). Changing the
+repo's DEFAULT branch or deleting it needs the GitHub API, which the deploy key
+cannot do; run that from a machine with `gh` authed as s4w3d0ff:
+`gh api -X PATCH repos/s4w3d0ff/modelctl -f default_branch=master`. Default is
+now `master`; never recreate a `main` branch here.
 
 Gitignored (never versioned): live `registry.json`, `deploy.json`, all
 `venv*/`, `*.bak*`, `__pycache__/`, and the whole `comfyui/` upstream checkout
