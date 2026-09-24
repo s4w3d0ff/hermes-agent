@@ -1,8 +1,8 @@
 model:
-  default: hauhaucs/qwen3.8-27b-uncensored-hauhaucs-aggressive-mtp-gguf/qwen3.8-27b-uncensored-hauhaucs-aggressive-q3_k_p.gguf
-  provider: lmstudio
-  base_url: http://192.168.8.173:1234/v1
-  context_length: 200000
+  default: qwen38
+  provider: custom
+  base_url: http://192.168.8.164:8080/v1
+  context_length: 245000
 toolsets:
   - hermes-cli
   - project

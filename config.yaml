@@ -2,7 +2,7 @@ model:
   default: qwen38
   provider: custom
   base_url: http://192.168.8.164:8080/v1
-  context_length: 250000
+  context_length: 245000
 toolsets:
   - hermes-cli
   - clarify
