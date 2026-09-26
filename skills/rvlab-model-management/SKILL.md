@@ -7,9 +7,24 @@ metadata:
 ---
 ## What you are driving
 
-modelctl is a single-GPU model orchestrator on rvlab (192.168.8.164, one 32 GB
-Tesla card). It loads/unloads/switches generative-AI models and manages their
-VRAM budget. Run as root: `sudo modelctl <status|list|load|unload|switch|check>`.
+modelctl is a GPU model orchestrator on rvlab (192.168.8.164, TWO cards: GPU0
+= RTX 3060 12 GB, GPU1 = Tesla PG500-216 32 GB). It loads/unloads/switches
+generative-AI models and manages their VRAM budget. Run as root:
+`sudo modelctl <status|list|load|unload|switch|check|pin|unpin>`.
+
+GPUs and index namespaces (verify before touching):
+- Registry `gpu_index` uses NVIDIA-SMI order: 0 = 3060 12GB, 1 = Tesla 32GB.
+  Global registry `gpu_index` (currently 1 = Tesla) is the default; a per-model
+  `gpu_index` wins over the global one. Small models (ocr, yolo26,
+  pp-doclayout, whisper, omnivoice) are pinned to the 3060 (index 0); the
+  LLMs (qwen38, qwen36) to the Tesla (index 1).
+- CUDA enumeration order (FastestFirst) is REVERSED on rvlab: CUDA device 0
+  = Tesla, CUDA 1 = 3060. CUDA_VISIBLE_DEVICES in a model's registry env{}
+  uses THIS order, so a Tesla-pinned model has gpu_index: 1 and
+  CUDA_VISIBLE_DEVICES=0 (see qwen38). Do not "fix" one to match the other.
+- Confirm: `nvidia-smi -L` (smi order) and
+  `/models/modelctl/venv/bin/python -c 'import torch; [print(i, torch.cuda.get_device_name(i)) for i in range(torch.cuda.device_count())]'`
+  (CUDA order).
 
 Key paths:
 - Binary: /usr/local/bin/modelctl (real code: /models/modelctl/modelctl.py)
@@ -17,8 +32,11 @@ Key paths:
 - Per-model launch config: /models/modelctl/configs/<id>.yaml
 - Generated units: /etc/systemd/system/model-<id>.service  (do not hand-edit)
 - README (authoritative field docs): /models/modelctl/README.md
-- Gateway: /models/modelctl/srv_gateway.py on :8080, fronts every model and
-  auto-loads by registry id.
+- Gateway: /models/modelctl/mc/servers/gateway.py on :8080, fronts every
+  model and auto-loads by registry id; serves the dashboard at /dashboard
+  (mc/servers/dashboard.py, multi-GPU since Sep 2026: per-GPU cards,
+  gpu.gpus[] in /api/state, per-model GPU column, history keys
+  gpu<N>_util/mem/total).
 
 NOTE: source lives at /models/modelctl (moved from /opt/modelctl in Sep 2026;
 the old tree was deleted). All systemd units point at the new path.
@@ -28,9 +46,13 @@ the old tree was deleted). All systemd units point at the new path.
 Local git repo in `/models/modelctl` (origin = github.com:s4w3d0ff/modelctl,
 deploy key at ~/.ssh/id_ed25519). REMOTE STATE: default branch is `master`
 (= 5433507); stale pre-refactor `main` deleted. LOCAL WORK (Sep 2026, unpushed):
-branch `feat/reproducible-config` = pushed tip; on top of it, local-only branch
-`feat/repo-cleanup` holds the repo cleanup (5 commits): python reorganized into a
-package, dead servers/venvs/comfyui removed, docs rewritten. Working tree clean.
+branch `feat/reproducible-config` = pushed tip; on top, local-only branch
+`feat/repo-cleanup`: repo cleanup (5 commits: python reorganized into a
+package, dead servers/venvs/comfyui removed, docs rewritten) plus multi-GPU
+pin work in modelctl.py (all_gpus, model_gpu_index, pin/unpin), qwen38 ctx
+262144, and the dashboard multi-GPU UI (commit a29317e). Still unpushed.
+Note: modelctl.py and configs/qwen38.yaml have live uncommitted edits in
+addition to the commits above.
 
 REPO LAYOUT (post-cleanup): `modelctl.py` at root; package under `mc/`. NO mc_/srv_
 prefixes on modules (folder already says what it is):
@@ -57,7 +79,7 @@ gitignored deploy.json). No LAN scoping exists anymore.
 
 Architecture (portable refactor, verified live): the registry is read in exactly
 one place, mc_registry.load_registry(path, strict), shared by modelctl.py,
-srv_gateway.py, srv_dashboard.py and the ComfyUI node pack. Models bind 127.0.0.1
+mc/servers/gateway.py, mc/servers/dashboard.py and the ComfyUI node pack. Models bind 127.0.0.1
 ONLY; the gateway (port 8080) is the single LAN-facing service and also serves
 the dashboard at /dashboard (mc-dashboard.service no longer exists). The
 gateway unit runs as root so its modelctl auto-loads need no privilege config
