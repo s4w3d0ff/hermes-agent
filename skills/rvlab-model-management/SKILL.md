@@ -46,13 +46,16 @@ the old tree was deleted). All systemd units point at the new path.
 Local git repo in `/models/modelctl` (origin = github.com:s4w3d0ff/modelctl,
 deploy key at ~/.ssh/id_ed25519). REMOTE STATE: default branch is `master`
 (= 5433507); stale pre-refactor `main` deleted. LOCAL WORK (Sep 2026, unpushed):
-branch `feat/reproducible-config` = pushed tip; on top, local-only branch
-`feat/repo-cleanup`: repo cleanup (5 commits: python reorganized into a
-package, dead servers/venvs/comfyui removed, docs rewritten) plus multi-GPU
-pin work in modelctl.py (all_gpus, model_gpu_index, pin/unpin), qwen38 ctx
-262144, and the dashboard multi-GPU UI (commit a29317e). Still unpushed.
-Note: modelctl.py and configs/qwen38.yaml have live uncommitted edits in
-addition to the commits above.
+branch `feat/reproducible-config` = pushed tip; on top, branch
+`feat/repo-cleanup` (PUSHED to origin Sep 2026): repo cleanup (5 commits:
+python reorganized into a package, dead servers/venvs/comfyui removed, docs
+rewritten) plus multi-GPU pin work in modelctl.py (all_gpus, model_gpu_index,
+pin/unpin), qwen38 ctx 262144, the dashboard multi-GPU UI (commit a29317e),
+the gateway request-logging tap (fed6b81: mc/servers/tap.py + tap_mw.py,
+log API in dashboard.py, README section), and CLI multi-GPU awareness +
+pin/unpin with qwen38 ctx 262144 (tip 86113c0). Pushed via
+`GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new" git push origin
+feat/repo-cleanup`; local and remote are in sync, working tree clean.
 
 REPO LAYOUT (post-cleanup): `modelctl.py` at root; package under `mc/`. NO mc_/srv_
 prefixes on modules (folder already says what it is):
@@ -98,10 +101,10 @@ cannot do; run that from a machine with `gh` authed as s4w3d0ff:
 now `master`; never recreate a `main` branch here.
 
 Gitignored (never versioned): live `registry.json`, `deploy.json`, all
-`venv*/`, `*.bak*`, `__pycache__/`, and the whole `comfyui/` upstream checkout
-(own `.git`). Committed templates: `registry.example.json` (tokenized),
-`configs/*.yaml`. Only our node pack file inside comfyui is tracked:
-`comfyui/custom_nodes/ComfyUI-modelctl/__init__.py`.
+`venv*/`, `*.bak*`, `__pycache__/`, the whole `comfyui/` upstream checkout
+(own `.git`), and `logs/` (live tap request logs). Committed templates:
+`registry.example.json` (tokenized), `configs/*.yaml`. Only our node pack file
+inside comfyui is tracked: `comfyui/custom_nodes/ComfyUI-modelctl/__init__.py`.
 
 Pitfall: `git add -f <file>` SILENTLY stages nothing when an ancestor dir is
 fully gitignored (rc=0, no error). Stage such files with
@@ -193,6 +196,21 @@ and/or `cat ~/.hermes/config.yaml` (base_url points at the :8080 gateway).
   tokenized with no user/workdir/lan keys (those live in gitignored
 deploy.json). If you regenerate it from the live registry, strip dead top-level
   lan_iface/lan_subnet keys first.
+- **Gateway venv runs Starlette 1.6: an ASGI middleware that buffers the request
+  must PARK on later `receive()` calls, never answer with an immediate
+  `http.disconnect`.** In this version `StreamingResponse.__call__` (ASGI spec
+  <2.4 path) runs the body stream and a `listen_for_disconnect(receive)` task in
+  one cancelling task group; answering that listener's second receive() with a
+  disconnect cancels the whole response before any body chunk is sent, so the
+  client gets an empty 200 (uvicorn logs "ASGI callable returned without
+  completing response"). The tap middleware (`tap_mw.py`) serves the buffered
+  request once then awaits a never-set `asyncio.Event` until cancelled. Also:
+  return the async receive *function*, not a coroutine object.
+- **Tap logging is on by default** (gateway middleware, per-model NDJSON under
+  `$MODELCTL_HOME/logs/<model>/`, daily gzip archive + prune). Dashboard API:
+  `/dashboard/api/logs[/{mid}/files|tail|search]` and `POST /api/logs/sweep`.
+  Config: `logs/tap.json` or `MC_TAP_ENABLED=0` to disable. It is streaming-
+  safe (forwards chunks as they arrive); only request bodies are buffered.
 
 ## Quick dry-run (no GPU change)
 
