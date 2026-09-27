@@ -1,7 +1,9 @@
 # pi context handling (verified from installed bundle)
 
 ## Local modification: caveman compaction extension
-`~/.pi/agent/extensions/caveman-compaction.ts` hooks `session_before_compact` and replaces the default summary with a caveman-ultra style one (same section structure, ultra-terse lines). Applies to manual `/compact [instructions]` and auto-compaction. Uses the session's current model for the summary call; keeps pi's cumulative `<read-files>`/`<modified-files>` tracking via `details`; honors customInstructions; falls back to stock compaction on any failure or empty result. So on THIS machine, summaries are caveman-ultra by default even though the settings file has no compaction key.
+`~/.pi/agent/extensions/caveman-compaction.ts` hooks `session_before_compact` and replaces the default summary with a caveman-ultra style one (same section structure, ultra-terse lines). Applies to manual `/compact [instructions]` and auto-compaction. Uses the session's current model for the summary call; honors customInstructions; falls back to stock compaction on any failure or empty result. So on THIS machine, summaries are caveman-ultra by default even though the settings file has no compaction key.
+
+**Multi-compaction file tracking (fixed Sep 2026).** pi's `extractFileOperations` only re-seeds file lists from a previous compaction when that entry is NOT hook-produced (`fromHook:false`). Hook entries are always `fromHook:true`, so on the 2nd+ consecutive compaction the structured `details.readFiles/modifiedFiles` would silently drop everything read before the first cut. The extension now seeds its own lists: it parses the `<read-files>`/`<modified-files>` blocks out of `preparation.previousSummary` (`parseFileBlock`) and unions them with pi's current-stretch ops in `fileLists(fileOps, previousSummary)`. A file read earlier but edited later is promoted from readFiles to modifiedFiles. The prompt also tells the model NOT to emit its own `<read-files>`/`<modified-files>` blocks (the extension appends them), preventing duplicate/stale lists on update passes. Verified end-to-end: 3 consecutive hook compactions accumulate 8 -> 16 -> 24 read files in both the JSONL `details` and the actual LLM request body (confirmed via modelctl tap log).
 
 ## Auto-compaction
 Defaults baked into pi: `{enabled: true, reserveTokens: 16384, keepRecentTokens: 20000}`. The user's `~/.pi/agent/settings.json` has no `compaction` key, so defaults apply.
@@ -14,7 +16,22 @@ What happens:
 - The most recent ~20k tokens are kept verbatim, cut at turn boundaries; if the cut must split a turn, the prefix gets its own mini-summary ("Turn Context (split turn)").
 - In context, everything older becomes one `compactionSummary` message: "The conversation history before this point was compacted into the following summary: <summary>...</summary>".
 
-Rolling updates: subsequent compactions use an UPDATE prompt that merges new messages into the existing summary (preserve prior info, move items In Progress -> Done) instead of summarizing from scratch. Summaries therefore accumulate across many compactions and degrade with each pass through a small model.
+## Cut point selection (`findCutPoint`, `findValidCutPoints`)
+Walks backward from the newest entry accumulating token estimates until it has kept `keepRecentTokens` (20k), then snaps forward to a valid cut point. Valid roles: user, assistant, bashExecution, custom, branchSummary, compactionSummary. `toolResult` is explicitly excluded, so pi never cuts between an assistant tool call and its result; the retained tail always contains complete call/result pairs.
+- Cut lands on a **user message**: clean split; everything before it goes to summarization, from that user message on stays verbatim (recent user prompts survive untouched unless older than the keep window).
+- Cut lands mid-turn (assistant/tool entry): "split turn". pi finds the turn start (`findTurnStartIndex`, nearest earlier user or bashExecution entry) and does TWO summaries: old history plus a prefix-only summary of this turn using `TURN_PREFIX_SUMMARIZATION_PROMPT`. Final summary = history + "---" + "**Turn Context (split turn):**" + prefixSummary.
+- Assistant messages with stopReason error/aborted/deferred are dropped from context entirely (`isContextMessage`), never summarized.
+
+## What the summarizer sees (`serializeConversation`)
+Messages flatten to plain text, one block per message: user -> `[User]: <text>` (text blocks only; images dropped); assistant -> optional `[Assistant thinking]:`, then `[Assistant]: <text>`, then `[Assistant tool calls]: name(k=v, k2="v2"); ...` with arguments JSON-stringified (the summarizer sees every call and its full args); toolResult -> `[Tool result]: <first 2000 chars>` (`TOOL_RESULT_MAX_CHARS=2000`) with a truncation marker; bashExecution entries are pre-converted to user text ("Ran `cmd`" + output) so they appear as `[User]:`. Full tool outputs never enter the summary prompt, only the 2k-char sample.
+
+## Summary request shape
+One single user message: `<conversation>...</conversation>` plus, on repeat compactions, the previous summary in `<previous-summary>` tags with `UPDATE_SUMMARIZATION_PROMPT` (preserve/merge rules) instead of the initial `SUMMARIZATION_PROMPT`; custom `/compact instructions` are appended as "Additional focus". System prompt is `SUMMARIZATION_SYSTEM_PROMPT`. maxTokens = min(0.8 * reserveTokens, model.maxOut).
+
+Rolling updates: subsequent compactions use an UPDATE prompt that merges new messages into the existing summary (preserve prior info, move items In Progress -> Done) instead of summarizing from scratch. The JSONL stores only `firstKeptEntryId` on the compaction entry; the retained tail is reconstructed by walking back to it (system entries skipped), and on the next compaction those retained messages are re-expanded as pseudo-entries so they get folded into the new summary rather than lost. Summaries therefore accumulate across many compactions and degrade with each pass through a small model.
+
+## File list carry-over (`extractFileOperations`)
+pi seeds file tracking from a previous compaction's `details.readFiles/modifiedFiles` ONLY when that entry has `fromHook:false`. Hook-produced entries are `fromHook:true`, so on the second and later compactions structured file lists do not carry over automatically; they survive only insofar as the summary text preserves them (pi feeds `<previous-summary>` back). A custom hook that wants bulletproof multi-compaction tracking must seed its own file lists from the previous summary's `<read-files>`/`<modified-files>` blocks.
 
 Overflow recovery: if a request still hits the context limit after normal checks (e.g., one giant tool output), pi performs an emergency compaction and retries once (`prepareOverflowCompaction`, single attempt per generation).
 

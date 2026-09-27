@@ -25,7 +25,8 @@ Read `~/.pi/README.md` before answering pi questions or changing anything. It is
 dist is minified; real code lives in `dist/bundle/chunks/*.js` plus `index.js`/`cli.js`, one giant line per chunk. Line-based tools are useless there.
 1. Grep symbol names across chunks to find the right file (`grep -rl 'shouldCompact' dist/bundle/chunks/`).
 2. Extract function bodies with a Python string search: locate `'function <name>('` and slice ~2-3k chars around it; print several hits of a key symbol to disambiguate.
-3. Key symbols for context handling: `DEFAULT_COMPACTION_SETTINGS`, `shouldCompact`, `prepareCompaction`, `compactWithRequest`, `SUMMARIZATION_PROMPT`, `UPDATE_SUMMARIZATION_PROMPT`, `COMPACTION_SUMMARY_PREFIX`.
+3. Key symbols for context handling: `DEFAULT_COMPACTION_SETTINGS`, `shouldCompact`, `prepareCompaction`, `findCutPoint`, `findValidCutPoints`, `compactWithRequest`, `generateSummaryWithRequest`, `serializeConversation`, `SUMMARIZATION_PROMPT`, `UPDATE_SUMMARIZATION_PROMPT`, `TURN_PREFIX_SUMMARIZATION_PROMPT`, `COMPACTION_SUMMARY_PREFIX`, `TOOL_RESULT_MAX_CHARS`, `isContextMessage`, `extractFileOperations`.
+4. GOTCHA: the bundle contains two parallel symbol families (plain and `2`-suffixed); what is actually exported is the `2` family, aliased at the end of the chunk (`serializeConversation2 as serializeConversation`). A grep for `'function <name>('` can return 0 hits when only the suffixed form exists; check the export alias map before concluding a symbol is missing.
 
 ## Context handling (short version)
 pi DOES auto-compact, on by default: when context exceeds `contextWindow - reserveTokens` (default 16384), it LLM-summarizes the old history into a structured checkpoint and keeps the most recent ~20k tokens verbatim. Full mechanics in references/context-handling.md.
@@ -35,7 +36,8 @@ pi DOES auto-compact, on by default: when context exceeds `contextWindow - reser
 - LLM call from extension: `ctx.modelRegistry.complete(ctx.model, {messages}, {maxTokens, signal, cacheRetention:"none", sessionId})` (uuidv7 from @earendil-works/pi-ai)
 - Compaction hook `session_before_compact`: event has preparation (messagesToSummarize, turnPrefixMessages, previousSummary, fileOps, tokensBefore, firstKeptEntryId), reason manual/threshold/overflow, customInstructions, signal. Return `{compaction:{summary, firstKeptEntryId, tokensBefore, usage?, details?}}` to replace the summary; return undefined to fall back to pi default
 - GOTCHA: `preparation.fileOps.read/.edited/.written` are Sets, not arrays (`.filter` on them throws). Spread before filtering
-- To keep pi's cumulative file tracking in a custom summary: set `details:{readFiles, modifiedFiles}` AND append `<read-files>`/`<modified-files>` blocks to the summary text yourself
+- To keep pi's cumulative file tracking in a custom summary: set `details:{readFiles, modifiedFiles}` AND append `<read-files>`/`<modified-files>` blocks to the summary text yourself. Across MULTIPLE compactions you must also seed from the previous summary yourself (pi only re-seeds details when the prior entry is fromHook:false), which caveman-compaction.ts does via parseFileBlock; see references/context-handling.md
+- GOTCHA: pi only re-ingests a previous compaction's `details.readFiles/modifiedFiles` when that entry has `fromHook:false` (`extractFileOperations`). Hook-produced entries are `fromHook:true`, so on the second and later compactions structured file lists do not carry over automatically; seed them yourself from the `<read-files>`/`<modified-files>` blocks in `preparation.previousSummary`.
 - Test headlessly via RPC (`pi --mode rpc`, JSONL stdin/stdout): wait for `agent_settled`, then send `{"type":"compact","customInstructions?":...}`. Manual compact fails with "Nothing to compact (session too small)" under ~20k tokens, so build a big session first (e.g., have pi read 8 files of ~45KB). Local model is slow: run tests as background jobs, allow several minutes
 
 ## Pitfalls
