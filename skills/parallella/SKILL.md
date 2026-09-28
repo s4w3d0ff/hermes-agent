@@ -84,7 +84,7 @@ if a board behaves contrary to them.
   0007774 and 0007771. Kickstarter-era units.
 - RPi 3 Model B v2 control node "par-ctrl" at 192.168.8.233 (user pi): the
   fleet's general-purpose machine, now running an I2C/GPIO sensor station
-  (LCD + DHT11 + BMP180).
+  (LCD + DHT11 + BMP180) with a LAN JSON API on port 8088.
 - Current state: one board runs on the LAN at 192.168.8.165 (USB-powered,
   Parabuntu 2016.11.1 headless z7010 on a 4 GB microSD). The two boards' power
   selector jumpers sit in different positions - check before powering either.

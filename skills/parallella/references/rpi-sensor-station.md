@@ -50,6 +50,21 @@ regenerating:
   agree within ~1-2 C (DHT11 is only +/-2-5 C). A disagreement means a bad
   read, not calibration drift.
 
-## Open work
-- LCD display integration of the pressure reading is not done yet; the driver
-  exposes read_pressure_pa() and read_temperature_c().
+## Station service and LAN API
+Managed by systemd unit weather-station.service (User=pi, WorkingDirectory=/home/pi/lcd_sf,
+Restart=always). Script: ~/lcd_sf/weather_station.py; logs via `journalctl -u weather-station`.
+- LCD shows pressure + trend triangle vs standard-atmosphere baseline at 2421 ft
+  (+/-3 hPa band), plus DHT11 temp/humidity. Solid up/down/level triangles are
+  custom HD44780 CGRAM glyphs (slots 0x40/0x48/0x50).
+- JSON API on 0.0.0.0:8088, served in-process by a daemon thread of the same
+  script (ThreadingHTTPServer):
+    GET / or /latest -> {timestamp, pressure_hpa, temperature_c, humidity_pct,
+                        sensors:{bmp180,dht11}}
+    GET /history?limit=N   ring buffer (~24h at the 5s loop period)
+    GET /health            uptime + per-sensor status
+- Design rule: keep any API in the SAME process as the sensor loop. DHT11 is
+  GPIO bit-banged; a second process reading it concurrently corrupts both reads.
+  One reader loop feeds LCD + shared state (LATEST dict + HISTORY deque); a
+  failed sensor publishes null/false, never crashes the loop.
+- No firewall on par-ctrl: 8088 is reachable from any LAN host. If UFW gets
+  added later, allow tcp/8088.
