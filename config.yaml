@@ -125,6 +125,7 @@ approvals:
   destructive_slash_confirm: false
 command_allowlist:
   - overwrite system config
+  - script execution via -e/-c flag
 kanban:
   dispatch_in_gateway: false
 code_execution:

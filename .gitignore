@@ -18,6 +18,8 @@ __pycache__/
 *.bak*
 *.etag
 *.heartbeat
+/pending/
+/pending_messages/
 install_id
 active_profile
 gateway_state.json
