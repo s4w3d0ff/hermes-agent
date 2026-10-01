@@ -85,7 +85,23 @@ if a board behaves contrary to them.
 - RPi 3 Model B v2 control node "par-ctrl" at 192.168.8.233 (user pi): the
   fleet's general-purpose machine, now running an I2C/GPIO sensor station
   (LCD + DHT11 + BMP180) with a LAN JSON API on port 8088.
-- Current state: one board runs on the LAN at 192.168.8.165 (USB-powered,
-  Parabuntu 2016.11.1 headless z7010 on a 4 GB microSD). The two boards' power
-  selector jumpers sit in different positions - check before powering either.
+- Current state: BOTH boards on the LAN, key-auth from the laptop
+  (aliases in ~/.ssh/config):
+  - 192.168.8.165 = `parallella1` (par-7774, serial 0007774)
+  - 192.168.8.161 = `parallella2` (par-7771, serial 0007771)
+  User/pass on both: `parallella`/`parallella` (passwordless sudo).
+  The two boards' power selector jumpers sit in different positions - check
+  before powering either.
 - No PoE hardware planned: boards run off USB cables / barrel supplies.
+- SSH QUIRK: the laptop's modern OpenSSH CLIENT hangs silently on password
+  auth against the boards' OpenSSH 6.7 servers (no banner reply after the
+  password, no error). Key auth works fine; programmatic password auth works
+  via paramiko (venv /tmp/pwssh). Do not mistake the hang for a wrong
+  password or a dead board.
+- Laptop also has key access to: `par-ctrl` = 192.168.8.233 (user pi,
+  pass also `parallella`); `rvlab` = 192.168.8.164 (Ubuntu 24.04, user
+  s4w3d0ff, key auth). rvlab is rate-limited against SSH probing
+  ("Not allowed at this time" banner for a few minutes after a burst of
+  connection attempts) - do not scan/brute it.
+- para-wake repo deploys to boards via `make BOARD=parallella1 board`
+  (rsync + native gcc 4.9.2, C99).

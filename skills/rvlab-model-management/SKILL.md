@@ -225,6 +225,24 @@ deploy.json). If you regenerate it from the live registry, strip dead top-level
   detect TCP drop auto-retry; clients with no read-timeout hang until the
   connection is killed. After restart, expect ~2 min of `503 Loading model`
   while weights reload before requests succeed again.
+- **Memory-pressure swap thrash (second "GPU at 0%" mode).** Distinct from the
+  CUDA deadlock above: the process is in `D` state with WCHAN=`folio_wait_bit_common`
+  (uninterruptible disk I/O wait), not a blocked futex. Sustained ~200 MB/s reads
+  from the model's storage device (`iostat -d -x` on sdc/sdd) show the kernel
+  re-faulting evicted pages back in. Root cause: system RAM (32 GB) is nearly full
+  with the model's RSS (~24 GB) + KV cache for large contexts, and swap was too
+  small to absorb the overflow without immediate re-eviction (thrash). Diagnostic
+  signature: `ps -o stat,wchan` shows `D...folio_wait_bit_common`; `free -m`
+  shows swap at or near 100% used; GPU util is 0% but the process IS making
+  progress (just ~200 MB/s page-fault rate instead of GB/s RAM access). Fix:
+  grow the swapfile (see below) so evicted pages have room to stay put. Reducing
+  `-c` (context window) in the model config also shrinks KV cache pressure.
+- **Swap on rvlab:** `/swapfile` on ext4 root (`/dev/sdc1`, 117 GB). Grew from
+  512 MB to **16 GB** (Oct 2026) after a thrash incident. To resize again:
+  `sudo swapoff /swapfile && sudo fallocate -l <SIZE> /swapfile && sudo mkswap
+  /swapfile && sudo swapon /swapfile`. The fstab entry (`/swapfile ... defaults`)
+  persists automatically since the path is unchanged. Verify with `swapon --show`
+  and `free -m | grep Swap`.
 
 ## Quick dry-run (no GPU change)
 
