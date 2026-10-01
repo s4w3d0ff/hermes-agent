@@ -211,6 +211,20 @@ deploy.json). If you regenerate it from the live registry, strip dead top-level
   `/dashboard/api/logs[/{mid}/files|tail|search]` and `POST /api/logs/sweep`.
   Config: `logs/tap.json` or `MC_TAP_ENABLED=0` to disable. It is streaming-
   safe (forwards chunks as they arrive); only request bodies are buffered.
+- **Tap log only records COMPLETED requests** (`dur_ms` = total wall time).
+  An in-flight generation is invisible until it lands or errors. Absence of a
+  new tap entry + GPU at 0% means the request never completed, not that no
+  request was sent. Use this to distinguish "still generating" (GPU ~100%,
+  no new entry yet) from "hung" (GPU 0%, no new entry).
+- **llama-server can deadlock mid-generation** (observed with MTP speculative
+  decoding on very long contexts, e.g. a 245k-token compaction summary). The
+  process stays resident in VRAM but the HTTP handler thread blocks forever:
+  GPU drops to 0%, `/v1/models` and `/health` time out, no new tap entry ever
+  lands. Fix: `sudo systemctl restart model-<id>.service` (default TimeoutStopSec=90s,
+  SIGTERM then SIGKILL frees VRAM even when the process is wedged). Clients that
+  detect TCP drop auto-retry; clients with no read-timeout hang until the
+  connection is killed. After restart, expect ~2 min of `503 Loading model`
+  while weights reload before requests succeed again.
 
 ## Quick dry-run (no GPU change)
 
