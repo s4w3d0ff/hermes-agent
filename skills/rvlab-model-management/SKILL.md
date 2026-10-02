@@ -237,12 +237,34 @@ deploy.json). If you regenerate it from the live registry, strip dead top-level
   progress (just ~200 MB/s page-fault rate instead of GB/s RAM access). Fix:
   grow the swapfile (see below) so evicted pages have room to stay put. Reducing
   `-c` (context window) in the model config also shrinks KV cache pressure.
+- **The gateway (`mc-gateway.service`) can wedge independently of the model.**
+  Distinct from both failure modes above: llama-server on :8081 still answers
+  (slowly) while the front door on :8080 times out entirely. Diagnosis signature:
+  `systemctl status mc-gateway` shows active, but every thread is `S` with WCHAN=`0`
+  (blocked on a futex), near-zero CPU delta over minutes, and
+  `ss -tnp | grep 8080` shows a pile of CLOSE-WAIT sockets the process never reaped.
+  Root cause: the gateway proxies chat completions with **synchronous
+  `requests.post()` inside async FastAPI handlers** (blocks the event loop on
+  connect) and has no client-disconnect detection, so when a client times out and
+  closes its socket the handler keeps holding the upstream connection; enough of
+  these accumulate and the whole front door stops serving. Fix:
+  `sudo systemctl restart mc-gateway.service`. This is cheap because the model stays
+  loaded on the GPU (separate service) and pi auto-reconnects + retries immediately,
+  no ~2-min reload. Verify with a fast `/dashboard/api/state` response before
+  declaring it fixed.
 - **Swap on rvlab:** `/swapfile` on ext4 root (`/dev/sdc1`, 117 GB). Grew from
   512 MB to **16 GB** (Oct 2026) after a thrash incident. To resize again:
   `sudo swapoff /swapfile && sudo fallocate -l <SIZE> /swapfile && sudo mkswap
   /swapfile && sudo swapon /swapfile`. The fstab entry (`/swapfile ... defaults`)
   persists automatically since the path is unchanged. Verify with `swapon --show`
   and `free -m | grep Swap`.
+- **Fix root causes on this stack; do NOT paper over with watchdogs/auto-restarts.**
+  When a component wedges, propose and apply the underlying fix: timeouts + client-
+  disconnect detection in the gateway proxy, right-sized RAM/swap/context so memory
+  pressure cannot recur, MTP config that does not deadlock. A systemd `WatchdogSec`
+  or auto-restart only delays detection of the same bug eating in-flight work; the
+  user explicitly rejects band-aids ("fix the gushing wound, don't slap a bandaid on
+  it"). Reserve restarts for clearing an active wedge, not as the fix.
 
 ## Quick dry-run (no GPU change)
 
