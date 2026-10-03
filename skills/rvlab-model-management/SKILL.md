@@ -112,7 +112,11 @@ fully gitignored (rc=0, no error). Stage such files with
 
 ## SELF-REFERENCE GATE (read first, every time)
 
-This agent runs OFF the gateway. The LLM it runs on is a loaded registry model.
+Verify before assuming: `cat ~/.hermes/config.yaml` base_url tells you which
+backend this session runs on. As of Oct 2026 it points at a SEPARATE LAN box
+(LM Studio, http://192.168.8.173:1234), NOT the rvlab gateway - so restarting
+mc-gateway or any model-<id> service on rvlab does NOT sever this session.
+If base_url ever points back at 192.168.8.164:8080, the rule below applies:
 `modelctl switch <other-llm>` or `unload` of the currently-loaded LLM will
 SEVER THIS SESSION (the agent loses its own inference backend).
 
@@ -126,8 +130,9 @@ Consequences for "add a model" requests:
   `sudo modelctl switch <id>` to run from another terminal (or get explicit
   approval to switch and note the session will drop).
 
-Find out which LLM you are running on: `sudo modelctl list` (the LOADED row)
-and/or `cat ~/.hermes/config.yaml` (base_url points at the :8080 gateway).
+Find out which LLM you are running on: `cat ~/.hermes/config.yaml` base_url
+first (it decides whether rvlab is even in your dependency chain), then
+`sudo modelctl list` (the LOADED row) for what the gateway itself serves.
 
 ## Workflow: add a new model
 
@@ -243,15 +248,17 @@ deploy.json). If you regenerate it from the live registry, strip dead top-level
   `systemctl status mc-gateway` shows active, but every thread is `S` with WCHAN=`0`
   (blocked on a futex), near-zero CPU delta over minutes, and
   `ss -tnp | grep 8080` shows a pile of CLOSE-WAIT sockets the process never reaped.
-  Root cause: the gateway proxies chat completions with **synchronous
-  `requests.post()` inside async FastAPI handlers** (blocks the event loop on
-  connect) and has no client-disconnect detection, so when a client times out and
-  closes its socket the handler keeps holding the upstream connection; enough of
-  these accumulate and the whole front door stops serving. Fix:
-  `sudo systemctl restart mc-gateway.service`. This is cheap because the model stays
-  loaded on the GPU (separate service) and pi auto-reconnects + retries immediately,
-  no ~2-min reload. Verify with a fast `/dashboard/api/state` response before
-  declaring it fixed.
+  The original root cause was **synchronous `requests.post()` inside async FastAPI
+  handlers** (blocks the event loop on connect) with no client-disconnect detection,
+  so timed-out clients leaked upstream connections until the front door stopped
+  serving. FIXED in Oct 2026 by rewriting the chat-completions proxy to a shared
+  `httpx.AsyncClient`: lazy creation bound to the running event loop, connect/read
+  timeouts plus a total streaming deadline (env: MC_UPSTREAM_CONNECT_TIMEOUT=30,
+  MC_UPSTREAM_READ_TIMEOUT=600, MC_UPSTREAM_TOTAL_DEADLINE=3600), and upstream
+  aborted in `finally` on client disconnect. If the wedge signature recurs it is a
+  NEW bug - restart still clears it (`sudo systemctl restart mc-gateway.service`,
+  cheap: model stays loaded, pi auto-reconnects). Verify with a fast
+  `/dashboard/api/state` response before declaring it fixed.
 - **Swap on rvlab:** `/swapfile` on ext4 root (`/dev/sdc1`, 117 GB). Grew from
   512 MB to **16 GB** (Oct 2026) after a thrash incident. To resize again:
   `sudo swapoff /swapfile && sudo fallocate -l <SIZE> /swapfile && sudo mkswap
@@ -260,11 +267,14 @@ deploy.json). If you regenerate it from the live registry, strip dead top-level
   and `free -m | grep Swap`.
 - **Fix root causes on this stack; do NOT paper over with watchdogs/auto-restarts.**
   When a component wedges, propose and apply the underlying fix: timeouts + client-
-  disconnect detection in the gateway proxy, right-sized RAM/swap/context so memory
-  pressure cannot recur, MTP config that does not deadlock. A systemd `WatchdogSec`
-  or auto-restart only delays detection of the same bug eating in-flight work; the
-  user explicitly rejects band-aids ("fix the gushing wound, don't slap a bandaid on
-  it"). Reserve restarts for clearing an active wedge, not as the fix.
+  disconnect detection in the gateway proxy, right-sized RAM/swap so memory
+  pressure cannot recur, an up-to-date llama.cpp that does not deadlock. A systemd
+  `WatchdogSec` or auto-restart only delays detection of the same bug eating
+  in-flight work; the user explicitly rejects band-aids ("fix the gushing wound,
+  don't slap a bandaid on it"). Reserve restarts for clearing an active wedge, not
+  as the fix.
+- **Keep qwen38 at full native context and parallel >= 2 - never shrink model config to "fix" memory pressure.** The user rejects reducing `-c` (wants the whole 262144 window) and forbids `--parallel` below 2. Mechanism: llama.cpp pre-allocates each slot's FULL n_ctx KV cache at startup (~15 GB per slot for qwen38 @ 262K, ~45 GB across 3 slots), which exceeds the box's 32 GB RAM by design - that is FINE as long as swap (now 16 GB) absorbs the overflow without thrashing. If memory pressure reappears, size RAM/swap to fit the reservation; do not propose cutting `-c` or `--parallel`.
+- **llama.cpp lives at /opt/llama.cpp** (git repo tracking ggml-org/llama.cpp); build dir `/opt/llama.cpp/build` holds a CMakeCache with all flags (Release, GGML_CUDA=ON, FA=ON, GRAPHS=ON, g++-14 + /usr/local/cuda nvcc), and `/usr/local/bin/llama-server` is a SYMLINK into `build/bin/`, so rebuilding in place upgrades the live binary. To upgrade: `git fetch origin && git checkout -B <branch> origin/master`, then in build/: `cmake ..` (reuses cached flags) + `make llama-server -j16` (~8-10 min; CUDA template instances dominate), restart the model service, verify with `llama-server --version` and the `system_fingerprint` field in API responses. The MTP mid-generation deadlock was addressed this way: rebuilt from current master (Oct 2026) to pick up spec/MTP fixes - if it recurs on a recent build, suspect model/config interaction and re-check upstream rather than assuming the old bug.
 
 ## Quick dry-run (no GPU change)
 
