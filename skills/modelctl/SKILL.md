@@ -104,6 +104,12 @@ fully gitignored (rc=0, no error). Stage such files with
    `sudo modelctl switch <id>`.
 8. Leave the tree clean before calling it done: delete every temp file, backup, and test artifact you created (untracked-but-harmless litter is NOT acceptable). The repo should look like only the intended change exists.
 
+## Code style (user rule)
+
+Project .py files carry NO comments and NO docstrings, including shebangs
+kept only where the file is executed directly. When editing or generating
+code for this project, write it comment-free; do not restore removed ones.
+
 ## Pitfalls
 
 - **For llama-server models the REGISTRY ENTRY's args/extra IS the launch

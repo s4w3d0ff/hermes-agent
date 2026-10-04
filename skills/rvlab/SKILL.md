@@ -33,10 +33,11 @@ do not hammer it.
 
 ## Fleet layout (verify before touching)
 
-Small models (paddleocr-vl/ocr, yolo26, pp-doclayout, whisper, omnivoice) are
-pinned to the 3060 (gpu_index 0); the LLMs (qwen38 dense 27B, qwen36 MoE
-A3B) run on the Tesla (gpu_index 1). Global registry gpu_index is 1. Confirm
-live state with `nvidia-smi -L` and `sudo modelctl list`.
+Single-model fleet: qwen38 only (Qwen3.8-27B UD-Q4_K_M GGUF, Tesla,
+gpu_index 1, port 8081, pinned). All other models and their weights were
+deleted on request; /models/llm holds only Qwen3.8-27B/Qwen3.8-27B-UD-
+Q4_K_M.gguf. Global registry gpu_index is 1. Confirm live state with
+`sudo modelctl list`.
 
 ## Git repo
 
