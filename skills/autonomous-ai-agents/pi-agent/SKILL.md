@@ -73,7 +73,7 @@ compaction appears as a `type:"compaction"` entry with the summary text; its
 presence is proof compaction finished.
 
 **Fix for a deadlocked backend**: restart the model service (see
-rvlab-model-management skill). pi detects the dropped TCP connection, opens a
+modelctl skill). pi detects the dropped TCP connection, opens a
 fresh one, and retries the in-flight request once the backend reloads (~2 min of
 `503 Loading model`). No local state is lost; the session resumes from where it
 was. Do NOT kill or restart the pi process itself to clear a stuck turn.
