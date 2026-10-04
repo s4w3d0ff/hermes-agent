@@ -13,7 +13,8 @@ models and manages their VRAM budget. Run as root:
 
 Key paths (all under MODELCTL_HOME, default /models/modelctl):
 - Binary: /usr/local/bin/modelctl (real code: $MODELCTL_HOME/modelctl.py)
-- Registry: registry.json. The single home for model parameters: llama models
+- Registry: registry.yaml. YAML ONLY - there is no JSON format or fallback anymore.
+  The single home for model parameters: llama models
   carry args{} + extra[]; torch servers carry flat knobs their server reads via
   config.entry(). configs/<id>.yaml is a supported fallback only (read when an
   entry has no args/extra); do not create one unless portability to a box
@@ -73,8 +74,8 @@ fully gitignored (rc=0, no error). Stage such files with
    Download target lives under /models/<kind>/ (e.g. /models/llm/<Model>/).
 2. Pick a FREE port. Gateway holds 8080; models occupy 808x. List taken ports
    first: `ss -tlnp | grep -oE ':[0-9]+$' | sort -u`. Do not guess.
-3. Back up the registry before editing:
-   `cp registry.json registry.json.bak-$(date +%Y%m%d)`
+3. Back up the registry before editing (`cp registry.yaml registry.yaml.bak`), and DELETE that backup once you have verified the edit (valid parse + resolved commands). Never leave .bak litter in the tree; git is the durable history.
+   NOTE: `modelctl.load_registry()` takes NO strict kwarg (that is mc.core.registry's); modelctl.py wraps it.
 4. Add the registry entry. Edit with Python json (not sed) so you do not break
    structure or ownership. Required fields: kind, description, path, port,
    vram_mib (estimate; auto-calibrated on first real load), ram_gib,
@@ -101,6 +102,7 @@ fully gitignored (rc=0, no error). Stage such files with
    - Gateway sees it: `curl -s http://127.0.0.1:8080/v1/models` includes the id.
 7. Hand the user the switch command for a terminal that is not this session:
    `sudo modelctl switch <id>`.
+8. Leave the tree clean before calling it done: delete every temp file, backup, and test artifact you created (untracked-but-harmless litter is NOT acceptable). The repo should look like only the intended change exists.
 
 ## Pitfalls
 
@@ -116,11 +118,17 @@ fully gitignored (rc=0, no error). Stage such files with
   `python3 -c "import sys; sys.path.insert(0,'<MODELCTL_HOME>'); import modelctl; r=modelctl.load_registry(); print(' '.join(modelctl._resolve_command('<id>', r['models']['<id>'])))"`
   To verify the WHOLE fleet at once, loop:
   `for mid, e in r["models"].items(): print(mid, " ".join(modelctl._resolve_command(mid, e)))`
-- **registry.json must parse before anything else works.** Every modelctl
+- **The registry file must parse before anything else works.** Every modelctl
   command, the gateway, and the dashboard load it at startup; one stray
-  character from a half-finished hand-edit breaks all of them with a
-  JSONDecodeError. After ANY manual registry edit (yours or the user's),
-  validate first: `python3 -c "import json; json.load(open('registry.json'))"`.
+  character from a half-finished hand-edit breaks all of them. After ANY manual
+  registry edit (yours or the user's), validate first:
+  `python3 -c "import yaml; yaml.safe_load(open('registry.yaml'))"`.
+- **The gateway caches the registry in-process at startup.** Converting or
+  renaming the registry file does NOT reach a running mc-gateway: it keeps
+  pointing at the old path and serves an EMPTY fleet (`/v1/models` returns
+  `data: []`) while every model service stays up. After any registry-file
+  rename/conversion, restart it: `sudo systemctl restart mc-gateway.service`
+  (cheap; models stay loaded), then confirm `/v1/models` lists the fleet.
 - **The user hand-edits registry/configs mid-refactor and leaves intermediate
   states.** When asked to "do the same for all models", diff live files against
   git HEAD (and `.bak*`) first to see exactly what changed, then complete the
