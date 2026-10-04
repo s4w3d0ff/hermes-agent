@@ -23,13 +23,16 @@ GPUs and index namespaces (verify before touching):
   uses THIS order, so a Tesla-pinned model has gpu_index: 1 and
   CUDA_VISIBLE_DEVICES=0 (see qwen38). Do not "fix" one to match the other.
 - Confirm: `nvidia-smi -L` (smi order) and
-  `/models/modelctl/venv/bin/python -c 'import torch; [print(i, torch.cuda.get_device_name(i)) for i in range(torch.cuda.device_count())]'`
+  `/models/modelctl/venvs/venv/bin/python -c 'import torch; [print(i, torch.cuda.get_device_name(i)) for i in range(torch.cuda.device_count())]'`
   (CUDA order).
 
 Key paths:
 - Binary: /usr/local/bin/modelctl (real code: /models/modelctl/modelctl.py)
 - Registry: /models/modelctl/registry.json  (add/remove models here)
-- Per-model launch config: /models/modelctl/configs/<id>.yaml
+- Model parameters live in the registry.json ENTRY (registry-first since Oct
+  2026): llama models carry args{} + extra[]; torch servers carry flat knobs.
+  configs/<id>.yaml is a supported FALLBACK only (_entry_config and the gateway
+  still read it when present); the dir on disk is EMPTY after the merge.
 - Generated units: /etc/systemd/system/model-<id>.service  (do not hand-edit)
 - README (authoritative field docs): /models/modelctl/README.md
 - Gateway: /models/modelctl/mc/servers/gateway.py on :8080, fronts every
@@ -53,7 +56,16 @@ rewritten) plus multi-GPU pin work in modelctl.py (all_gpus, model_gpu_index,
 pin/unpin), qwen38 ctx 262144, the dashboard multi-GPU UI (commit a29317e),
 the gateway request-logging tap (fed6b81: mc/servers/tap.py + tap_mw.py,
 log API in dashboard.py, README section), and CLI multi-GPU awareness +
-pin/unpin with qwen38 ctx 262144 (tip 86113c0). Pushed via
+pin/unpin with qwen38 ctx 262144 (86113c0), then the flat-config refactor
+edc75f3, then UNCOMMITTED on top: registry-first merge - configs/*.yaml
+deleted from disk, every model's parameters (args/extra for llama, flat knobs
+for torch) merged into its registry.json entry, servers read knobs via
+config.entry(), _resolve_command prefers the entry's args/extra with YAML as
+fallback; then the venvs/ move (registry command[] paths, install.sh,
+.gitignore `venvs/`, README, registry.example.json, requirements headers).
+Working tree: 7 deleted configs + ~12 modified files.
+Check `git log origin/feat/repo-cleanup..HEAD` AND `git status --short`
+before assuming state. Pushed via
 `GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new" git push origin
 feat/repo-cleanup`; local and remote are in sync, working tree clean.
 
@@ -71,11 +83,13 @@ self-shadow the library import and crash at startup. The comfyui/ checkout + nod
 are GONE (removed with the image/audio servers).
 
 VENV POLICY: one shared venv by default; separate venv only on real dependency
-conflict. Fleet now has exactly TWO: `venv` (base.txt: gateway, dashboard,
-yolo26, whisper, omnivoice) and `venv-paddle` (paddle.txt: pp-doclayout, because
+conflict. Fleet now has exactly TWO, both under a `venvs/` root at the project root (moved
+Oct 2026): `venvs/venv` (base.txt: gateway, dashboard, yolo26, whisper,
+omnivoice) and `venvs/venv-paddle` (paddle.txt: pp-doclayout, because
 PaddlePaddle's CUDA runtime conflicts with PyTorch). The old venv-acestep/-nemo/
--uocr/-comfy were deleted (~36 GB freed; 53G -> 17G total). install.sh VENV_REQ map
-now lists only [venv]=base.txt and [venv-paddle]=paddle.txt. The code is
+-uocr/-comfy were deleted (~36 GB freed; 53G -> 17G total). install.sh builds into
+`$HOME_DIR/venvs/$v` (VENV_REQ map: [venv]=base.txt, [venv-paddle]=paddle.txt);
+.gitignore covers the whole `venvs/` dir. The code is
 config-driven and box-agnostic: paths resolve from mc_paths (MODELCTL_HOME/
 MODELS_ROOT + ${...} tokens) and per-box settings from mc_deploy (env vars or
 gitignored deploy.json). No LAN scoping exists anymore.
@@ -100,15 +114,20 @@ cannot do; run that from a machine with `gh` authed as s4w3d0ff:
 `gh api -X PATCH repos/s4w3d0ff/modelctl -f default_branch=master`. Default is
 now `master`; never recreate a `main` branch here.
 
-Gitignored (never versioned): live `registry.json`, `deploy.json`, all
-`venv*/`, `*.bak*`, `__pycache__/`, the whole `comfyui/` upstream checkout
+Gitignored (never versioned): live `registry.json`, `deploy.json`, the whole
+`venvs/` tree, `*.bak*`, `__pycache__/`, the whole `comfyui/` upstream checkout
 (own `.git`), and `logs/` (live tap request logs). Committed templates:
-`registry.example.json` (tokenized), `configs/*.yaml`. Only our node pack file
+`registry.example.json` (tokenized) plus `configs/*.yaml` in git HEAD
+(deleted from disk by the registry-first merge; still a supported fallback). Only our node pack file
 inside comfyui is tracked: `comfyui/custom_nodes/ComfyUI-modelctl/__init__.py`.
 
 Pitfall: `git add -f <file>` SILENTLY stages nothing when an ancestor dir is
 fully gitignored (rc=0, no error). Stage such files with
 `git update-index --add --cacheinfo 100644,$(git hash-object -w <f>),<path>`.
+
+Stale `.bak*` files under /models/modelctl (root and configs/) are disposable
+scratch copies; when asked to remove redundant config files, delete them. Git
+history is the real backup for tracked content.
 
 ## SELF-REFERENCE GATE (read first, every time)
 
@@ -145,21 +164,30 @@ first (it decides whether rvlab is even in your dependency chain), then
 3. Back up the registry before editing:
    `cp /models/modelctl/registry.json /models/modelctl/registry.json.bak-$(date +%Y%m%d)`
 4. Add the registry entry. Edit with Python json (not sed) so you do not break
-   structure or ownership. Required fields: kind, description, path,
-   command=[binary] (FALLBACK ONLY, see pitfall), port, health_url, vram_mib
-   (estimate; auto-calibrated on first real load), ram_gib, load_seconds,
-   limits{memory_high,cpu_quota}, enabled:true. Optional: workdir, env{},
-   action_path, api_style, no_calibrate. Do NOT set a per-model `user`
-   field; units run as mc_deploy.user() (first login user by default).
-5. CREATE /models/modelctl/configs/<id>.yaml. This is what ACTUALLY launches a
-   llama-server model. Copy an existing config field-for-field (e.g. qwen38.yaml)
-   and change model_path, port, sampling, and spec flags. See
-   references/modelctl-config-anatomy.md.
+   structure or ownership. Required fields: kind, description, path, port,
+   vram_mib (estimate; auto-calibrated on first real load), ram_gib,
+   load_seconds, limits{memory_high,cpu_quota}, enabled:true. Optional:
+   workdir, env{}, gpu_index, action_path (torch servers), no_calibrate,
+   args{} + extra[] (llama models: the launch flags; see step 5), flat knobs
+   for torch servers (task/conf/iou, device/threshold, ...), pinned (set by
+   `modelctl pin`), command[] (NON-LLAMA servers only). NEVER store health_url
+   (derived from port: http://127.0.0.1:<port>/health) or a per-model `user`
+   (units run as mc_deploy.user()).
+5. Put every model parameter in the REGISTRY ENTRY (single home since the
+   registry-first merge). llama models: `args{}` (every server flag verbatim:
+   ctx, offload, threads, parallel, ALL sampling params, spec flags, reasoning
+   budget) + optional `extra[]` (value-less flags / extra files); modelctl
+   launches: llama-server --model <path> --host 127.0.0.1 --port <registry
+   port> + args + extra. Torch servers: flat knobs their server reads
+   (task/conf/iou, device/threshold, ...). Port goes in the registry ONLY.
+   configs/<id>.yaml still works as a fallback (_entry_config prefers the
+   entry's args/extra), but do not create one unless portability to a box
+   without the merged registry is needed: keeping both copies is how they drift.
 6. Verify WITHOUT touching the GPU (all safe, no changes):
    - `python3 -c "import json; json.load(open('/models/modelctl/registry.json'))"`
      (valid JSON)
    - Print the exact launch command modelctl will build (no start):
-     `python3 <skill>/scripts/resolve_modelcmd.py <id>`  (see scripts/)
+     the `_resolve_command` one-liner in the pitfall below
    - `sudo modelctl list`  (new id appears, state `-`)
    - `sudo modelctl check <id>`  (dry-run space check. It will report NOT-FIT
      while the current LLM occupies the card; that is expected and correct, not
@@ -170,20 +198,51 @@ first (it decides whether rvlab is even in your dependency chain), then
 
 ## Pitfalls
 
-- **The registry `command[]` is a FALLBACK, not the launch command, for
-  llama-server models.** modelctl rebuilds the launch from
-  configs/<id>.yaml: server_binary + `--model <model_path>` + every option that
-  has a `flag:` + `extra_args`. A registry entry with a full command but no
-  YAML launches with NO flags (bare binary) and will misbehave. Always create
-  the YAML, then confirm with resolve_modelcmd.py. Non-llama-server models
-  (torch servers) use the registry command verbatim and have no YAML.
+- **For llama-server models the REGISTRY ENTRY's args/extra IS the launch
+  command.** _resolve_command prefers the entry's `args{}` + `extra[]` and
+  builds: llama-server --model <path> --host 127.0.0.1 --port <registry port>
+  + every args entry + extra (non-flag extras resolved via models_path). A
+  configs/<id>.yaml with a `model:` key is only consulted when the entry has
+  no args/extra (fallback for portable templates); if neither exists it falls
+  through to command[], so an entry with none of these launches nothing.
+  Non-llama (torch) servers run their registry command[] verbatim; their knobs
+  live as flat keys in the entry and are read via config.entry(). Confirm what will launch without touching the GPU:
+  `python3 -c "import sys; sys.path.insert(0,'/models/modelctl'); import modelctl; r=modelctl.load_registry(); print(' '.join(modelctl._resolve_command('<id>', r['models']['<id>'])))"`
+  (run on rvlab; substitute <id>). To verify the WHOLE fleet at once, loop:
+  `for mid, e in r["models"].items(): print(mid, " ".join(modelctl._resolve_command(mid, e)))`
+- **registry.json must parse before anything else works.** Every modelctl
+  command, the gateway, and the dashboard load it at startup; one stray
+  character from a half-finished hand-edit breaks all of them with a
+  JSONDecodeError. After ANY manual registry edit (yours or the user's),
+  validate first: `python3 -c "import json; json.load(open('/models/modelctl/registry.json'))"`.
+  If it fails, diff against the newest `.bak*` to find what changed instead of
+  guessing.
+- **Llama launch parameters live ONLY in the registry entry.** The entry's
+  `args{}`/`extra[]` win over any configs/<id>.yaml. If you see server flags in
+  BOTH an entry and its YAML, that is drift residue from a half-finished merge:
+  keep the entry (the single home) and delete or fix the YAML copy.
+- **The user hand-edits registry/configs mid-refactor and leaves intermediate
+  states.** When asked to "do the same for all models", diff live files against
+  git HEAD (and `.bak*`) first to see exactly what changed, then complete the
+  pattern fleet-wide rather than re-deriving it from scratch.
+- **When completing a user's in-progress edit, preserve their exact values.**
+  Fix only what breaks validity (e.g. an args block that makes registry.json
+  unparseable becomes `args{}` + sibling `extra[]`), never reconstruct the
+  content from your own assumptions: reverting or dropping their half-finished
+  work is a far worse failure than keeping it.
+- **Consolidation tasks: merge, prove, then delete.** When asked to fold
+  redundant config files into a surviving file, first move EVERY key/value
+  from each redundant file into the survivor and assert programmatically that
+  every one landed with its exact value; make consumers read from the survivor
+  and verify they work with the old files absent (hide them, re-run); only
+  then delete. Deleting before proving absorption is how data gets lost.
 - **`--spec-type draft-mtp` only works if the GGUF EMBEDS the MTP head
   (nextn.* tensors).** Not every Qwen GGUF carries it. Before copying spec
   flags from another model, inspect the tensor list and grep for `nextn`:
-  zero nextn tensors means OMIT every `--spec-type`/`--spec-*` flag. See
-  references/modelctl-config-anatomy.md for the exact inspection snippet.
+  zero nextn tensors means OMIT every `--spec-type`/`--spec-*` flag.
   (The C++ `llama-gguf r <file> n` aborts on an assert here; use the python
-  `gguf` reader instead.)
+  `gguf` reader: `from gguf import GGUFReader; r = GGUFReader(path);
+  any(n.startswith("nextn") for n in (t.name for t in r.tensors))`.)
 - **MoE "A3B" models are fast but need ALL weights resident in VRAM.** A
   35B-A3B Q4_K_M GGUF is ~22 GB; a 32 GB card cannot co-run two such LLMs.
   Active-params is a speed story, not a memory story.
@@ -275,12 +334,32 @@ deploy.json). If you regenerate it from the live registry, strip dead top-level
   as the fix.
 - **Keep qwen38 at full native context and parallel >= 2 - never shrink model config to "fix" memory pressure.** The user rejects reducing `-c` (wants the whole 262144 window) and forbids `--parallel` below 2. Mechanism: llama.cpp pre-allocates each slot's FULL n_ctx KV cache at startup (~15 GB per slot for qwen38 @ 262K, ~45 GB across 3 slots), which exceeds the box's 32 GB RAM by design - that is FINE as long as swap (now 16 GB) absorbs the overflow without thrashing. If memory pressure reappears, size RAM/swap to fit the reservation; do not propose cutting `-c` or `--parallel`.
 - **llama.cpp lives at /opt/llama.cpp** (git repo tracking ggml-org/llama.cpp); build dir `/opt/llama.cpp/build` holds a CMakeCache with all flags (Release, GGML_CUDA=ON, FA=ON, GRAPHS=ON, g++-14 + /usr/local/cuda nvcc), and `/usr/local/bin/llama-server` is a SYMLINK into `build/bin/`, so rebuilding in place upgrades the live binary. To upgrade: `git fetch origin && git checkout -B <branch> origin/master`, then in build/: `cmake ..` (reuses cached flags) + `make llama-server -j16` (~8-10 min; CUDA template instances dominate), restart the model service, verify with `llama-server --version` and the `system_fingerprint` field in API responses. The MTP mid-generation deadlock was addressed this way: rebuilt from current master (Oct 2026) to pick up spec/MTP fixes - if it recurs on a recent build, suspect model/config interaction and re-check upstream rather than assuming the old bug.
+- **Moving a venv dir breaks console-script shebangs.** `python3 -m venv` bakes
+  an ABSOLUTE interpreter path into every bin/<script> first line, and they may
+  point at ancient pre-move homes (e.g. /opt/modelctl) that no longer exist.
+  After moving: rewrite each bin/* shebang to the new absolute path (pyvenv.cfg
+  home= and _virtualenv.pth are relative and fine), then prove with
+  `<new>/bin/python -c "import <key pkg>"` per venv before touching consumers.
+- **Venv move checklist (every consumer must point at the new root):** live
+  registry.json command[] paths, every live systemd unit that runs a venv python
+  (mc-gateway.service + model-*.service) followed by `systemctl daemon-reload`,
+  install.sh build dir + its gateway unit template, .gitignore,
+  registry.example.json tokens, README, requirements headers. Prove end-to-end
+  by loading a torch server and confirming it serves from the new path (its
+  traceback site-packages line shows the home).
 
 ## Quick dry-run (no GPU change)
 
-    python3 <skill>/scripts/resolve_modelcmd.py <id>
+    python3 -c "import sys; sys.path.insert(0,'/models/modelctl'); import modelctl; r=modelctl.load_registry(); print(' '.join(modelctl._resolve_command('<id>', r['models']['<id>'])))"
     sudo modelctl list
     sudo modelctl check <id>
 
 These prove the model is registered, its launch command is correct, and it is
 wired into the space checker, without loading anything or risking the session.
+
+## Working over SSH
+
+Do not inline multi-line Python through `ssh rvlab 'python3 - <<EOF'`: nested
+quotes/brackets get mangled by the shell layers (SyntaxError on the remote).
+Write the script locally, then `scp it rvlab:/tmp/x.py && ssh rvlab 'python3
+/tmp/x.py'`.
