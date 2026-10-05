@@ -49,22 +49,29 @@ mc.core.registry.load_registry(path, strict), shared by modelctl.py, gateway,
 and dashboard. Models bind 127.0.0.1 ONLY; the gateway (port 8080) is the
 single LAN-facing service and also serves /dashboard. The gateway unit runs as
 root so its modelctl auto-loads need no privilege config anywhere in the
-stack. Generated model units run as mc_deploy.user(): MODELCTL_USER env >
-deploy.json "user" > first login account (uid>=1000) > root; zero-config on a
-fresh single-user box. No firewall rules are generated at all. install.sh is
+stack. Generated model units run as mc.core.deploy.user(): MODELCTL_USER/MC_USER
+env > owner of $MODELCTL_HOME > first login account (uid>=1000) > root;
+zero-config on a fresh single-user box. No firewall rules are generated at all. install.sh is
 idempotent, touches only venvs + the modelctl symlink + one unit file,
 auto-detects GPU CUDA arch for the llama.cpp build; MODELS.md maps every
 registry entry to its upstream weight source. Read-only modelctl commands work
 non-root; load/unload/switch require root.
 
-Gitignored (never versioned): live `registry.json`, `deploy.json`, the whole
-`venvs/` tree, `*.bak*`, `__pycache__/`, and `logs/` (live tap request logs).
-Committed template: `registry.example.json` (tokenized; no user/workdir/lan
-keys, those live in gitignored deploy.json). Never put box-specific values in
-committed files.
+Gitignored (never versioned): live `registry.yaml`, the whole `venvs/` tree,
+`*.bak*`, `__pycache__/`, and `logs/` (live tap request logs). Committed
+template: `registry.example.yaml`. There is NO per-box config file (no
+`deploy.json`); every box-specific value resolves from env at load, so nothing
+box-specific is ever committed.
 Pitfall: `git add -f <file>` SILENTLY stages nothing when an ancestor dir is
 fully gitignored (rc=0, no error). Stage such files with
 `git update-index --add --cacheinfo 100644,$(git hash-object -w <f>),<path>`.
+
+## Runtime settings (no config file)
+
+mc/core/deploy.py resolves every box-specific value from env at load and caches it in memory for the process lifetime; nothing is hardcoded or generated on disk.
+- service user (unit `User=`): MODELCTL_USER / MC_USER, else owner of $MODELCTL_HOME, else first login account (uid>=1000), else root
+- llama-server binary: MODELCTL_LLAMA_SERVER / MC_LLAMA_SERVER, else first llama-server on PATH
+- dashboard control token: MODELCTL_TOKEN / MC_TOKEN, else EMPTY (every mutating /api/* action and log read is refused). On rvlab the gateway unit pins it via a systemd drop-in `Environment=` line; set it there to keep the dashboard usable.
 
 ## Workflow: add a new model
 
@@ -85,7 +92,7 @@ fully gitignored (rc=0, no error). Stage such files with
    for torch servers (task/conf/iou, device/threshold, ...), pinned (set by
    `modelctl pin`), command[] (NON-LLAMA servers only). NEVER store health_url
    (derived from port: http://127.0.0.1:<port>/health) or a per-model `user`
-   (units run as mc_deploy.user()).
+   (units run as mc.core.deploy.user()).
 5. Put every model parameter in the REGISTRY ENTRY (single home). llama models:
    `args{}` (every server flag verbatim: ctx, offload, threads, parallel, ALL
    sampling params, spec flags, reasoning budget) + optional `extra[]`
@@ -93,7 +100,7 @@ fully gitignored (rc=0, no error). Stage such files with
    llama-server --model <path> --host 127.0.0.1 --port <registry port> + args
    + extra. Torch servers: flat knobs their server reads.
 6. Verify WITHOUT touching the GPU (all safe, no changes):
-   - `python3 -c "import json; json.load(open('registry.json'))"` (valid JSON)
+   - `python3 -c "import yaml; yaml.safe_load(open('registry.yaml'))"` (valid YAML)
    - Print the exact launch command modelctl will build (no start): the
      `_resolve_command` one-liner in Pitfalls below
    - `sudo modelctl list`  (new id appears, state `-`)
@@ -140,7 +147,7 @@ code for this project, write it comment-free; do not restore removed ones.
   git HEAD (and `.bak*`) first to see exactly what changed, then complete the
   pattern fleet-wide rather than re-deriving it from scratch. Preserve their
   exact values: fix only what breaks validity (e.g. an args block that makes
-  registry.json unparseable becomes `args{}` + sibling `extra[]`), never
+  registry.yaml unparseable becomes `args{}` + sibling `extra[]`), never
   reconstruct content from your own assumptions.
 - **Consolidation tasks: merge, prove, then delete.** When asked to fold
   redundant config files into a surviving file, first move EVERY key/value
@@ -163,7 +170,7 @@ code for this project, write it comment-free; do not restore removed ones.
   and do not obsess over exactness.
 - **A colliding port breaks the health check silently.** The unit waits until
   load timeout then stops. Always confirm the port is free before picking it.
-- **Preserve registry.json ownership.** modelctl's save_registry chowns the
+- **Preserve registry.yaml ownership.** modelctl's save_registry chowns the
   file back to the original owner, but if you edit it as root outside
   modelctl, chown it back to the user or it becomes unwritable later.
 - **Gateway venv runs Starlette 1.6: an ASGI middleware that buffers the
@@ -246,7 +253,7 @@ code for this project, write it comment-free; do not restore removed ones.
   _virtualenv.pth are relative and fine), then prove with `<new>/bin/python -c
   "import <key pkg>"` per venv before touching consumers.
 - **Venv move checklist (every consumer must point at the new root):** live
-  registry.json command[] paths, every live systemd unit that runs a venv
+  registry.yaml command[] paths, every live systemd unit that runs a venv
   python followed by `systemctl daemon-reload`, install.sh build dir + its
   gateway unit template, .gitignore, registry.example.json tokens, README,
   requirements headers. Prove end-to-end by loading a torch server and
@@ -256,6 +263,7 @@ code for this project, write it comment-free; do not restore removed ones.
   'python3 - <<EOF'`: nested quotes/brackets get mangled by the shell layers.
   Write the script locally, then `scp it host:/tmp/x.py && ssh host 'python3
   /tmp/x.py'`.
+- **modelctl.py MUST keep its python3 shebang.** `/usr/local/bin/modelctl` is a symlink to it, so without `#!/usr/bin/env python3` on line 1 the CLI (and the gateway's `subprocess.run(["modelctl", "load", ...])` auto-load) fail with Exec format error. If you rewrite modelctl.py, keep that first line.
 
 ## Quick dry-run (no GPU change)
 
