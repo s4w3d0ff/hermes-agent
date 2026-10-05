@@ -77,6 +77,23 @@ modelctl skill). pi detects the dropped TCP connection, opens a
 fresh one, and retries the in-flight request once the backend reloads (~2 min of
 `503 Loading model`). No local state is lost; the session resumes from where it
 was. Do NOT kill or restart the pi process itself to clear a stuck turn.
+4. **Long-prefill timeout cascade (distinct from deadlock)**: with big contexts
+   (~140k+ tokens) the backend spends 8-15 min prefilling with ZERO output bytes,
+   and three independent timeouts used to kill such requests:
+   - gateway header-wait window = `MC_UPSTREAM_CONNECT_TIMEOUT + 30` (NOT the read
+     timeout), default 60s -> fixed on rvlab via drop-in
+     `/etc/systemd/system/mc-gateway.service.d/timeout.conf`
+     (`MC_UPSTREAM_CONNECT_TIMEOUT=3600`, `MC_UPSTREAM_READ_TIMEOUT=3600`).
+   - pi's per-request timeout derives from the `httpIdleTimeoutMs` setting
+     (default 300s; also sets undici global headers/body idle timeouts). Set
+     `"httpIdleTimeoutMs": 0` in `~/.pi/agent/settings.json` to disable it.
+   - openai-node SDK default is 600s, but pi overrides via the setting above.
+   Signature: tap log shows requests dying at exactly ~60.04s with status 502
+   while GPU sits at 100% (healthy prefill, not deadlock).
+5. **Settings are read at startup and on `/reload` only** - no file watcher.
+   Edit `~/.pi/agent/settings.json`, then run `/reload` inside pi to apply live
+   (re-reads settings, re-runs `configureHttpDispatcher`, rebuilds chat from the
+   session JSONL; safe mid-session).
 
 ## Pitfalls
 - Do not guess pi behavior from other agents; verify against `~/.pi/README.md` or the bundle, because behavior is version-specific (`pi update` changes it).

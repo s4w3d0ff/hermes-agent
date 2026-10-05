@@ -203,6 +203,16 @@ code for this project, write it comment-free; do not restore removed ones.
   nearly full with the model's RSS + KV cache for large contexts, and swap was
   too small to absorb the overflow without immediate re-eviction. Fix: grow the
   swapfile so evicted pages have room to stay put.
+- **Gateway header-wait window is `MC_UPSTREAM_CONNECT_TIMEOUT + 30`, not the
+  read timeout.** The streaming path wraps `client.send()` (waiting for response
+  HEADERS) in `asyncio.wait_for(..., UPSTREAM_CONNECT_TIMEOUT + 30)`; default =
+  60s. llama.cpp sends no bytes until prefill finishes, so any model whose prompt
+  prefill exceeds the window gets a 502 "upstream timeout" (tap log shows exact
+  ~60.04s durations). For long-context models raise it via drop-in
+  `/etc/systemd/system/mc-gateway.service.d/timeout.conf` with
+  `Environment="MC_UPSTREAM_CONNECT_TIMEOUT=..."` (+ daemon-reload + restart
+  mc-gateway; model stays loaded). rvlab currently runs 3600 for both CONNECT and
+  READ (worst-case qwen38 prefill ~29 min at full 262k ctx).
 - **The gateway (`mc-gateway.service`) can wedge independently of the model.**
   llama-server on :8081 still answers while the front door on :8080 times out
   entirely. Diagnosis signature: `systemctl status mc-gateway` shows active,
