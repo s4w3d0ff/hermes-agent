@@ -119,6 +119,23 @@ code for this project, write it comment-free; do not restore removed ones.
 
 ## Pitfalls
 
+- **Decision models (clef, Jev, Kev, ...) serve /v1/systemone, not chat.**
+  They return typed decisions in one forward pass; there is no
+  chat/completions. The gateway proxies `POST /v1/systemone` for them
+  (added to mc/servers/gateway.py mirroring the non-streaming chat path,
+  rewriting the model id back). Request shape: {"model":<id>,
+  "state":... , "questions":{"q":{"type":"choice|score|noul",
+  "instructions":..., "criteria":...}}}. Images go in as data URLs
+  (data:image/...;base64,...) under state or a top-level images[] array.
+- **Pass the multimodal projector with `--mmproj <file>`** (this build's
+  flag is `-mm` / `--mmproj`, NOT `-mmproj`). In the registry put it in
+  extra[] as the pair ["--mmproj", "${MODELS_ROOT}/.../mmproj-....gguf"]
+  so resolve_command emits `--mmproj <abs path>`. A bare positional file is
+  not how this build takes the projector.
+- **Decision models have NO MTP head** (zero nextn.* tensors), so OMIT every
+  --spec-type/--spec-* flag for them even if a sibling model uses them. Same
+  rule as any GGUF without an embedded MTP head: inspect the tensor list and
+  only add spec flags when nextn.* tensors exist.
 - **For llama-server models the REGISTRY ENTRY's args/extra IS the launch
   command.** _resolve_command prefers the entry's `args{}` + `extra[]` and
   builds: llama-server --model <path> --host 127.0.0.1 --port <registry port>

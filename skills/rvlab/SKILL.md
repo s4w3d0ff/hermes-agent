@@ -29,15 +29,26 @@ do not hammer it.
   checkout -B <branch> origin/master`, then in build/: `cmake ..` (reuses
   cached flags) + `make llama-server -j16` (~8-10 min), restart the model
   service, verify with `llama-server --version` and the `system_fingerprint`
-  field in API responses.
+  field in API responses. The tree is kept current enough to support the
+  clef decision-model architecture (LLM_ARCH_CLEF) and the /v1/systemone
+  endpoint; if a new model arch fails to load with "unknown model
+  architecture", upgrade llama.cpp first.
 
 ## Fleet layout (verify before touching)
 
-Single-model fleet: qwen38 only (Qwen3.8-27B UD-Q4_K_M GGUF, Tesla,
-gpu_index 1, port 8081, pinned). All other models and their weights were
-deleted on request; /models/llm holds only Qwen3.8-27B/Qwen3.8-27B-UD-
-Q4_K_M.gguf. Global registry gpu_index is 1. Confirm live state with
-`sudo modelctl list`.
+Multi-model fleet, all on the two GPUs:
+- qwen38: Qwen3.8-27B dense UD-Q4_K_M GGUF, Tesla (gpu_index 1), port 8081,
+  PINNED. This is the primary LLM.
+- swift15: Swift 1.5 Qwen3.8-27B GSQ-RCO IQ2_XS (ukisai hybrid attn),
+  3060 (gpu_index 0), port 8082. Usually UNLOADED; load on demand.
+- clef: Cloudflare clef-flash 9B decision model, bartowski Q4_K_M GGUF,
+  3060 (gpu_index 0), port 8083, with the f16 mmproj for image input.
+  It is a DECISION model: it serves /v1/systemone (typed decisions), not
+  chat/completions. Reachable via gateway :8080/v1/systemone with
+  {"model":"clef",...}. Weights under /models/llm/Cloudflare-clef-flash/.
+Global registry gpu_index is 1 (Tesla default). Confirm live state with
+`sudo modelctl list`. The 3060 holds swift15 and/or clef; the Tesla holds
+qwen38.
 
 ## Git repo
 
