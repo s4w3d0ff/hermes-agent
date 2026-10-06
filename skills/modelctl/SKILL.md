@@ -136,6 +136,13 @@ code for this project, write it comment-free; do not restore removed ones.
   character from a half-finished hand-edit breaks all of them. After ANY manual
   registry edit (yours or the user's), validate first:
   `python3 -c "import yaml; yaml.safe_load(open('registry.yaml'))"`.
+- **Quote YAML-1.1-ambiguous string values in the registry (`on`, `off`,
+  `yes`, `no`, `true`, `false`).** PyYAML's safe_load reads a bare `on` as
+  boolean True, so an unquoted `-fa: on` becomes `-fa true` (flash-attn off)
+  and the unit drifts. Always write these values quoted (`-fa: 'on'`).
+  modelctl.py's save_registry force-quotes such strings via a ruamel str
+  representer, so its own saves no longer corrupt them; but hand-edits and any
+  other writer still must quote them.
 - **The gateway caches the registry in-process at startup.** Converting or
   renaming the registry file does NOT reach a running mc-gateway: it keeps
   pointing at the old path and serves an EMPTY fleet (`/v1/models` returns
