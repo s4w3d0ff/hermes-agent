@@ -211,12 +211,24 @@ code for this project, write it comment-free; do not restore removed ones.
   `$MODELCTL_HOME/logs/<model>/`, daily gzip archive + prune). Dashboard API:
   `/dashboard/api/logs[/{mid}/files|tail|search]` and `POST /api/logs/sweep`.
   Config: `logs/tap.json` or `MC_TAP_ENABLED=0` to disable. It is streaming-
-  safe (forwards chunks as they arrive); only request bodies are buffered.
-- **Tap log only records COMPLETED requests** (`dur_ms` = total wall time).
-  An in-flight generation is invisible until it lands or errors. Absence of a
-  new tap entry + GPU at 0% means the request never completed, not that no
-  request was sent. Use this to distinguish "still generating" (GPU ~100%, no
-  new entry yet) from "hung" (GPU 0%, no new entry).
+  safe (forwards chunks as they arrive) AND buffers the FULL response body per
+  request up to `resp_cap_mb` (default 32 MB), so completed stream records carry
+  the entire SSE payload verbatim in `response.body` plus a `truncated` flag if
+  it exceeded the cap. In-flight requests additionally emit periodic progress
+  records (see next bullet).
+- **Tap log records BOTH in-flight and completed requests.** The middleware
+  (`mc/servers/tap_mw.py`) emits a lightweight `state:"in_flight"` record every
+  `probe_seconds` (~5s default) while a request is open, carrying `phase`
+  (waiting_headers / streaming_no_bytes / streaming), `status`, `elapsed_ms`,
+  `bytes`, and `chunks`. When the request ends it writes one `state:"complete"`
+  record with full headers, scrubbed request body, response, `dur_ms`, error.
+  So a hung request is now VISIBLE: its in_flight records keep advancing
+  `elapsed_ms` while `bytes`/`chunks` stop growing (stalled mid-stream) or never
+  start (waiting_headers / streaming_no_bytes). To tell "still generating" from
+  "hung": watch the latest in_flight record's bytes/chunks delta across two
+  probes, not just GPU. Config knobs in `logs/tap.json` (or env): `probe_seconds`
+  (in-flight cadence), `resp_cap_mb` (max response body buffered per request,
+  default 32 MB; beyond that only sha256 + truncated flag).
 - **llama-server can deadlock mid-generation** (observed with MTP speculative
   decoding on very long contexts). The process stays resident in VRAM but the
   HTTP handler thread blocks forever: GPU drops to 0%, `/v1/models` and

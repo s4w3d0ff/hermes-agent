@@ -17,7 +17,7 @@ Read `~/.pi/README.md` before answering pi questions or changing anything. It is
 - `~/.pi/agent/settings.json` - defaultProvider/defaultModel (`rvlab/qwen38`), thinking level, telemetry off, `skills: ["~/.hermes/skills"]`, optional `compaction` block (see references/context-handling.md)
 - `~/.pi/agent/models.json` - providers; rvlab points at a keyless LAN OpenAI-compatible endpoint; qwen38 = 245k context / 32768 max out, reasoning on
 - System prompt: `~/.pi/agent/SYSTEM.md` (replaces), `APPEND_SYSTEM.md` (appends); per-project `.pi/SYSTEM.md` wins over agent-dir; `AGENTS.md`/`CLAUDE.md` always loaded
-- Extensions: `~/.pi/agent/extensions/*.ts`, auto-loaded via jiti (no build step). Existing: `web-browser.ts` (drives camofox on :9377), `caveman-compaction.ts` (replaces default compaction summary with caveman-ultra style; see references/context-handling.md)
+- Extensions: `~/.pi/agent/extensions/*.ts`, auto-loaded via jiti (no build step). Existing: `web-browser.ts` (drives camofox on :9377), `caveman-compaction.ts` (replaces default compaction summary with caveman-ultra style; see references/context-handling.md), `wedged-recovery.ts` (activity watchdog: detects a busy-but-silent agent loop, escalates warn -> `ctx.abort()` -> `ctx.shutdown()`, plus `/unstuck [force]` command)
 - Skills: `~/.pi/agent/skills/` plus the shared Hermes skills dir; name+description are injected into the system prompt, bodies load on demand
 - Sessions: `~/.pi/agent/sessions/<cwd-slug>/*.jsonl`; resume with `pi --continue`; every entry (messages, usage, compaction) is in the JSONL
 
@@ -45,6 +45,8 @@ Runtime rewrite without touching the bundle (verified): extension hooks, pure st
 
 ## Extension API (verified)
 - Factory: default export `(pi: ExtensionAPI) => void`. Events via `pi.on(name, async (event, ctx) => ...)`. Types in `<pkg>/dist/core/extensions/types.d.ts`; docs at `<pkg>/docs/extensions.md` and `examples/extensions/`
+- Recovery primitives on ctx: `ctx.abort()` (end current operation), `ctx.isIdle()` (= not agent-run-active AND not compacting; false while a turn is in flight, including wedged ones), `ctx.shutdown()` (clean exit; session resumes via `pi --continue`). There is no out-of-band getContext() and no dispose/unload hook (factory returns void): capture `ctx` from any handler to use later (e.g. in timers), clear timers on `session_shutdown`, re-arm on `session_start`
+- `/reload` tears down the old extension runner (`session_shutdown(reason:"reload")`) and re-runs discovery, so new/changed extension files load without a restart; it also fires `session_start(reason:"reload")`
 - LLM call from extension: `ctx.modelRegistry.complete(ctx.model, {messages}, {maxTokens, signal, cacheRetention:"none", sessionId})` (uuidv7 from @earendil-works/pi-ai)
 - Compaction hook `session_before_compact`: event has preparation (messagesToSummarize, turnPrefixMessages, previousSummary, fileOps, tokensBefore, firstKeptEntryId), reason manual/threshold/overflow, customInstructions, signal. Return `{compaction:{summary, firstKeptEntryId, tokensBefore, usage?, details?}}` to replace the summary; return undefined to fall back to pi default
 - GOTCHA: `preparation.fileOps.read/.edited/.written` are Sets, not arrays (`.filter` on them throws). Spread before filtering
@@ -94,6 +96,7 @@ was. Do NOT kill or restart the pi process itself to clear a stuck turn.
    Edit `~/.pi/agent/settings.json`, then run `/reload` inside pi to apply live
    (re-reads settings, re-runs `configureHttpDispatcher`, rebuilds chat from the
    session JSONL; safe mid-session).
+6. **Client-side wedge (no backend involvement)**: zero TCP sockets from pi (`ss -tnp | grep <pid>` empty) + zero child processes + frozen session mtime + healthy backend = the agent loop deadlocked locally at turn end (still busy, no provider request in flight, nothing to wake the event loop). Distinct from #2/#3: there is NO ESTAB connection and GPU is idle. Fix without losing state: load a watchdog extension via `/reload` (see `wedged-recovery.ts`) or kill pi + `pi --continue`; the JSONL holds everything through the last completed message.
 
 ## Pitfalls
 - Do not guess pi behavior from other agents; verify against `~/.pi/README.md` or the bundle, because behavior is version-specific (`pi update` changes it).
@@ -102,6 +105,8 @@ was. Do NOT kill or restart the pi process itself to clear a stuck turn.
 - Some default strings exist TWICE in the bundle (skills intro: main builder + rpc/print-mode copy; read/write descriptions: legacy createReadTool/createWriteTool + *Definition variants). Count occurrences before replacing and replace every copy, or the print-mode path leaks defaults.
 - Template literals inside minified chunks hold REAL newline bytes inside backticks, not `\n` escapes (e.g. the skills intro starts with two literal newlines). Print repr() of the surrounding bytes before building exact-match replacements.
 - When removing/replacing text at user request, do not leave explanatory comments noting what was removed - the replacement content just stands there; leftover "removed X" notes are unwanted.
+- Unit-testing an extension via jiti: clear `/tmp/jiti` between runs (jiti caches compiled modules by path and silently serves stale code after edits), load from the INSTALLED path so tests match production, and pass `ctx` as the 2nd handler arg in your fake pi (`(event, ctx)`)
+- Silence-based wedge detection needs separate windows per state: llama.cpp emits ZERO stream events during prefill (multi-minute at big contexts), so use a generous window when no token has arrived since the last provider request; suppress while any tool is in flight (long builds produce legitimate silence); prime `busy` from `ctx.isIdle()` on load to catch already-wedged sessions
 
 ## Keeping pi's runtime self-contained (no hermes dependency)
 pin: pi must run on its own install environment and rely on nothing under `~/.hermes/`.
