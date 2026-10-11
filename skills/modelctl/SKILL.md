@@ -192,6 +192,22 @@ code for this project, write it comment-free; do not restore removed ones.
 - **`vram_mib` is an estimate.** modelctl recalibrates it from the real VRAM
   delta on first successful load. Seed it from file size + a comparable model
   and do not obsess over exactness.
+- **CUDA device order vs nvidia-smi: keep them in lockstep.** CUDA runtime
+  defaults to `CUDA_DEVICE_ORDER=FastestFirst` (a speed heuristic), so on a box
+  with mixed cards the runtime index can be REVERSED relative to nvidia-smi /
+  kernel / PCI bus order. modelctl's registry carries BOTH a `gpu_index`
+  (used by the space checker, expected in nvidia-smi/PCI order) and an env
+  `CUDA_VISIBLE_DEVICES` (a CUDA-runtime index). If runtime order != PCI order,
+  those two fields silently disagree and models can land on the wrong card.
+  Fix at the root: set `CUDA_DEVICE_ORDER=PCI_BUS_ID` so runtime == nvidia-smi
+  == PCI, then make `gpu_index` and `CUDA_VISIBLE_DEVICES` equal. On rvlab this
+  is enforced box-wide via /etc/environment + a systemd drop-in
+  (/etc/systemd/system.conf.d/cuda-order.conf) AND per-model unit env (the
+  registry env block), so llama-server always runs with it regardless of how it
+  was launched. Verify the live order without touching VRAM by reading
+  `/proc/<llama_pid>/environ` or a tiny cuDeviceGet probe; confirm which card a
+  model actually sits on via `nvidia-smi --query-compute-apps=gpu_uuid,...`
+  (match UUID to `nvidia-smi -L`).
 - **A colliding port breaks the health check silently.** The unit waits until
   load timeout then stops. Always confirm the port is free before picking it.
 - **Preserve registry.yaml ownership.** modelctl's save_registry chowns the

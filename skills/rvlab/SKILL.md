@@ -14,10 +14,15 @@ knowledge). Facts about THIS machine only.
   alias in ~/.ssh/config). Rate-limited against SSH probing: batch commands,
 do not hammer it.
 - TWO GPUs (NVIDIA-SMI order): GPU0 = RTX 3060 12 GB, GPU1 = Tesla PG500-216
-  32 GB. CUDA enumeration is REVERSED on this box (FastestFirst): CUDA device
-  0 = Tesla, CUDA 1 = 3060. So a model pinned to the Tesla has registry
-  gpu_index: 1 and env CUDA_VISIBLE_DEVICES=0; do not "fix" one to match the
-  other.
+  32 GB. CUDA runtime order is pinned to PCI/nvidia-smi order box-wide via
+  CUDA_DEVICE_ORDER=PCI_BUS_ID (set in /etc/environment AND the systemd drop-in
+  /etc/systemd/system.conf.d/cuda-order.conf, plus per-model unit env), so CUDA
+  device index == nvidia-smi/kernel/PCI index: 0 = 3060, 1 = Tesla. Registry
+  gpu_index and CUDA_VISIBLE_DEVICES are BOTH in this order and MATCH (qwen38:
+  gpu_index 1 + CVD 1; swift15/clef: gpu_index 0 + CVD 0). Do NOT remove the
+  PCI_BUS_ID setting or "realign" indices back to FastestFirst. The default
+  CUDA_DEVICE_ORDER=FastestFirst enumerates by a speed heuristic (Tesla first),
+  which is what made runtime order look reversed vs nvidia-smi before this fix.
 - RAM 32 GB + /swapfile on ext4 root (currently 16 GB). To resize:
   `sudo swapoff /swapfile && sudo fallocate -l <SIZE> /swapfile && sudo mkswap
   /swapfile && sudo swapon /swapfile`; the fstab entry persists since the path
